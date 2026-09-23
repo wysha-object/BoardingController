@@ -1,0 +1,40 @@
+<Publish>
+    <ModId Value="" />
+    
+    <DisplayName Value="Boarding Controller [Beta]" />
+
+    <ShortDescription Value="Controls vehicle boarding behavior" />
+
+    <LongDescription>
+
+# Boarding Controller [Beta]
+
+Beta version of Boarding Controller ()
+
+# **IMPORTANT: DO NOT SWITCH BACK TO THE STABLE CHANNEL WHEN THE BETA VERSION IS AHEAD OF STABLE (THAT IS, THEY HAVE DIFFERENT COMMIT HASHES), AS THIS MAY CAUSE ISSUES.**
+
+    </LongDescription>
+    
+    <Thumbnail Value="Properties/BetaThumbnail.png" />
+    
+    <Screenshot Value="Properties/Screenshots/Screenshot1.jpg" />
+    
+    <Tag Value="" />
+    
+    <ForumLink Value="" />
+    
+    <ModVersion Value="" />
+    
+    <GameVersion Value="1.*" />
+    
+	<Dependency Id="75426" DisplayName="I18n EveryWhere" />
+    
+    <ChangeLog>
+    </ChangeLog>
+    
+    <ExternalLink Type="discord" Url="https://discord.gg/jhwjtNHukX" />
+    <ExternalLink Type="github" Url="https://github.com/wysha-object/BoardingController" />
+    <ExternalLink Type="youtube" Url="https://www.youtube.com/@StarsSail" />
+    <ExternalLink Type="paypal" Url="https://paypal.me/SSObject" />
+    <ExternalLink Type="crowdin" Url="https://crowdin.com/project/boardingcontroller" />
+</Publish>

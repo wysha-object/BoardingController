@@ -1,0 +1,99 @@
+import { XMLParser } from 'fast-xml-parser'
+import XMLBuilder from 'fast-xml-builder'
+import { execSync } from 'node:child_process'
+import fs from 'node:fs'
+
+const MOD_CONFIGURATION_PATH = './UI/mod.json'
+const STABLE_PUBLISH_CONFIGURATION_PATH = './PublishConfigurations/Stable.xml'
+const BETA_PUBLISH_CONFIGURATION_PATH = './PublishConfigurations/Beta.xml'
+const CHANGELOG_PATH = './changelog.md'
+
+console.log('Starting publish-mod script')
+
+const args = process.argv.slice(2)
+if (args.length === 0) {
+  console.error('Please provide a valid argument: "stable" or "beta"')
+  process.exit(1)
+}
+
+args[0] = args[0].toLocaleUpperCase()
+
+if (args[0] !== 'STABLE' && args[0] !== 'BETA') {
+  console.error('Invalid argument. Please provide "stable" or "beta"')
+  process.exit(1)
+}
+
+let modConfiguration = fs.readFileSync(MOD_CONFIGURATION_PATH, 'utf-8')
+const parsedModConfiguration = JSON.parse(modConfiguration)
+
+let changelog = fs.readFileSync(CHANGELOG_PATH, 'utf-8')
+
+let publishConfiguration =
+  args[0] === 'STABLE'
+    ? fs.readFileSync(STABLE_PUBLISH_CONFIGURATION_PATH, 'utf-8')
+    : fs.readFileSync(BETA_PUBLISH_CONFIGURATION_PATH, 'utf-8')
+
+const parsedPublishConfiguration = new XMLParser({
+  ignoreAttributes: false,
+}).parse(publishConfiguration)
+
+const commitHash = execSync('git rev-parse HEAD').toString().trim().slice(0, 7)
+
+if (args[0] === 'STABLE') {
+  parsedPublishConfiguration['Publish']['ModVersion']['@_Value'] =
+    `${parsedModConfiguration['version']}+${commitHash}`
+} else {
+  const now = new Date()
+  const date =
+    now.getUTCFullYear().toString() +
+    String(now.getUTCMonth() + 1).padStart(2, '0') +
+    String(now.getUTCDate()).padStart(2, '0') +
+    'T' +
+    String(now.getUTCHours()).padStart(2, '0') +
+    String(now.getUTCMinutes()).padStart(2, '0')
+
+  parsedPublishConfiguration['Publish']['ModVersion']['@_Value'] =
+    `${parsedModConfiguration['version']}-beta.${date}+${commitHash}`
+}
+parsedPublishConfiguration['Publish']['ChangeLog'] = changelog
+
+const releaseVersion =
+  parsedPublishConfiguration['Publish']['ModVersion']['@_Value']
+
+publishConfiguration = new XMLBuilder({
+  ignoreAttributes: false,
+  format: true,
+}).build(parsedPublishConfiguration)
+
+console.log(`Release Version: ${releaseVersion}`)
+console.log(`Changelog: ${changelog}`)
+
+fs.writeFileSync(
+  './Code/Properties/PublishConfiguration.xml',
+  publishConfiguration,
+  'utf-8',
+)
+
+if (args.length >= 2) {
+  if (args[1].toLowerCase() === 'no-publish') {
+    console.log('Skipping publish step as no-publish flag is provided.')
+    process.exit(0)
+  } else {
+    console.error(
+      'Invalid second argument. Use "no-publish" to skip publishing.',
+    )
+    process.exit(1)
+  }
+}
+
+console.log('Finished preparing publish configuration')
+
+execSync(
+  `dotnet publish Code/Code.csproj -p:PublishProfile=PublishNewVersion -p:RELEASE_CHANNEL=${args[0]} -p:RELEASE_VERSION=${releaseVersion}`,
+  {
+    shell: true,
+    stdio: 'inherit',
+  },
+)
+
+console.log('Finished dotnet publish')
