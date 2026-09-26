@@ -18,8 +18,8 @@ namespace BoardingController.Utils
             int currentIndex
         )
         {
-            int leaderIndex = GetLeaderIndex(connectedLookup, customWaypointLookup, routeWaypointBuffer, currentIndex, out bool allLinked, out int linkedCount);
-            if (allLinked)
+            int leaderIndex = GetLeaderIndex(connectedLookup, customWaypointLookup, routeWaypointBuffer, currentIndex, out int linkedCount);
+            if (linkedCount == routeWaypointBuffer.Length)
             {
                 return (currentIndex + 1) % routeWaypointBuffer.Length;
             }
@@ -29,7 +29,6 @@ namespace BoardingController.Utils
                 customWaypointLookup,
                 routeWaypointBuffer,
                 (leaderIndex + linkedCount) % routeWaypointBuffer.Length,
-                out _,
                 out int nextLinkedCount
             );
             Entity nextLeaderWaypointEntity = routeWaypointBuffer[nextLeaderIndex].m_Waypoint;
@@ -37,7 +36,8 @@ namespace BoardingController.Utils
             if (customWaypointLookup.TryGetComponent(nextLeaderWaypointEntity, out CustomWaypoint nextLeaderCustomWaypoint))
             {
                 nextIndex = (nextLeaderCustomWaypoint.m_LastSelectIndex + 1) % routeWaypointBuffer.Length;
-                nextIndex = nextLeaderIndex + (nextIndex - nextLeaderIndex) % nextLinkedCount;
+                nextIndex =
+                    (nextLeaderIndex + ((nextIndex - nextLeaderIndex + routeWaypointBuffer.Length) % routeWaypointBuffer.Length) % nextLinkedCount) % routeWaypointBuffer.Length;
                 nextLeaderCustomWaypoint.m_LastSelectIndex = (byte)nextIndex;
                 customWaypointLookup[nextLeaderWaypointEntity] = nextLeaderCustomWaypoint;
             }
@@ -53,84 +53,60 @@ namespace BoardingController.Utils
             ComponentLookup<CustomWaypoint> customWaypointLookup,
             DynamicBuffer<RouteWaypoint> routeWaypointBuffer,
             int index,
-            out bool allLinked,
             out int linkedCount
         )
         {
             var leaderIndex = index;
-            allLinked = false;
             linkedCount = 1;
-            for (int i = index - 1; i >= 0; i--)
-            {
-                var routeWaypoint = routeWaypointBuffer[i];
-                if (connectedLookup.HasComponent(routeWaypoint.m_Waypoint))
-                {
-                    if (customWaypointLookup.TryGetComponent(routeWaypoint.m_Waypoint, out var customWaypoint) && (customWaypoint.m_Options & CustomWaypoint.Options.Linked) != 0)
-                    {
-                        leaderIndex--;
-                        linkedCount++;
-                        continue;
-                    }
-                    break;
-                }
-            }
-            for (int i = index; i <= routeWaypointBuffer.Length - 1; i++)
-            {
-                var routeWaypoint = routeWaypointBuffer[i];
-                if (connectedLookup.HasComponent(routeWaypoint.m_Waypoint))
-                {
-                    if (customWaypointLookup.TryGetComponent(routeWaypoint.m_Waypoint, out var customWaypoint) && (customWaypoint.m_Options & CustomWaypoint.Options.Linked) != 0)
-                    {
-                        linkedCount++;
-                        continue;
-                    }
-                    break;
-                }
-            }
 
-            if (leaderIndex == 0)
+            int i = index;
+            while (true)
             {
-                for (int i = routeWaypointBuffer.Length - 1; i >= (leaderIndex + linkedCount) % routeWaypointBuffer.Length; i--)
+                i = (routeWaypointBuffer.Length + i - 1) % routeWaypointBuffer.Length;
+                if (i == index)
                 {
-                    var routeWaypoint = routeWaypointBuffer[i];
-                    if (connectedLookup.HasComponent(routeWaypoint.m_Waypoint))
-                    {
-                        if (
-                            customWaypointLookup.TryGetComponent(routeWaypoint.m_Waypoint, out var customWaypoint)
-                            && (customWaypoint.m_Options & CustomWaypoint.Options.Linked) != 0
-                        )
-                        {
-                            leaderIndex = (leaderIndex + routeWaypointBuffer.Length - 1) % routeWaypointBuffer.Length;
-                            linkedCount++;
-                            continue;
-                        }
-                        return leaderIndex;
-                    }
+                    break;
                 }
-            }
-            if ((leaderIndex + linkedCount - 1) % routeWaypointBuffer.Length == 0)
-            {
-                for (int i = 0; i <= leaderIndex - 1 - 1; i++)
+                var routeWaypoint = routeWaypointBuffer[i].m_Waypoint;
+                if (connectedLookup.HasComponent(routeWaypoint))
                 {
-                    var routeWaypoint = routeWaypointBuffer[i];
-                    if (connectedLookup.HasComponent(routeWaypoint.m_Waypoint))
+                    if (customWaypointLookup.TryGetComponent(routeWaypoint, out var customWaypoint) && (customWaypoint.m_Options & CustomWaypoint.Options.Linked) != 0)
                     {
-                        if (
-                            customWaypointLookup.TryGetComponent(routeWaypoint.m_Waypoint, out var customWaypoint)
-                            && (customWaypoint.m_Options & CustomWaypoint.Options.Linked) != 0
-                        )
-                        {
-                            linkedCount++;
-                            continue;
-                        }
+                        leaderIndex = i;
+                        linkedCount++;
+                    }
+                    else
+                    {
                         break;
                     }
                 }
             }
 
+            int j = index;
+            while (true)
+            {
+                var routeWaypoint = routeWaypointBuffer[j].m_Waypoint;
+                if (connectedLookup.HasComponent(routeWaypoint))
+                {
+                    if (customWaypointLookup.TryGetComponent(routeWaypoint, out var customWaypoint) && (customWaypoint.m_Options & CustomWaypoint.Options.Linked) != 0)
+                    {
+                        linkedCount++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                j = (j + 1) % routeWaypointBuffer.Length;
+                if (j == (routeWaypointBuffer.Length + index - 1) % routeWaypointBuffer.Length)
+                {
+                    break;
+                }
+            }
+
             if (linkedCount >= routeWaypointBuffer.Length)
             {
-                allLinked = true;
+                linkedCount = routeWaypointBuffer.Length;
                 return 0;
             }
 
