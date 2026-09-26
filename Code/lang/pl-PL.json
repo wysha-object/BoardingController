@@ -1,0 +1,11 @@
+{
+    "BoardingController": "Boarding Controller",
+    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "Version",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Release Channel",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Version",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "The release channel to use for updates.",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.Version]": "The current version of the mod.",
+    "Options.SECTION[BoardingController.BoardingController.Mod]": "Boarding Controller",
+    "Options.TAB[BoardingController.BoardingController.Mod.TabGeneral]": "General",
+    "Options.WARNING[BoardingController.BoardingController.Mod.Settings.ResetBindings]": "This will reset all key bindings to their default values. Are you sure you want to continue?"
+}
