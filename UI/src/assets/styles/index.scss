@@ -1,0 +1,121 @@
+.boarding-controller-root {
+  --right-panel-width: 35em;
+
+  *[disabled] {
+    opacity: 0.3;
+  }
+
+  Button[variant='flat'] {
+    border-radius: 3rem;
+    background-color: var(--toolbarFieldColor);
+    &:hover {
+      background-color: var(--toolbarFieldColor-hover);
+    }
+    &:active {
+      background-color: var(--toolbarFieldColor-active);
+    }
+    &[disabled] {
+      background-color: var(--toolbarFieldColor);
+    }
+
+    &.top-option-button {
+      background-color: var(--accentColorNormal);
+      color: black;
+      margin-bottom: 0;
+      border-radius: 5rem 5rem 0 0;
+      &.selected {
+        background-color: white;
+      }
+    }
+  }
+
+  Button[variant='round'] {
+    padding: 5rem;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    &:active {
+      background-color: rgba(255, 255, 255, 0.4);
+    }
+    &[disabled] {
+      background-color: transparent;
+    }
+  }
+
+  svg {
+    fill: var(--textColor);
+  }
+
+  input {
+    background-color: rgba(28, 37, 52, 0.72);
+    border-top-color: rgba(255, 255, 255, 0.5);
+    border-left-color: rgba(255, 255, 255, 0.5);
+    border-right-color: rgba(255, 255, 255, 0.5);
+    border-bottom-color: rgba(255, 255, 255, 0.5);
+    border-top-left-radius: 3rem 3rem;
+    border-top-right-radius: 3rem 3rem;
+    border-bottom-left-radius: 3rem 3rem;
+    border-bottom-right-radius: 3rem 3rem;
+    text-align: center;
+    line-height: 1em;
+    color: var(--textColor);
+  }
+
+  .horizontal-divider {
+    height: 3rem;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .horizontal-divider-with-gap {
+    @extend .horizontal-divider;
+    margin: 5rem 0;
+  }
+
+  .vertical-divider {
+    height: 100%;
+    width: 3rem;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .vertical-divider-with-gap {
+    @extend .vertical-divider;
+    margin: 0 5rem;
+  }
+
+  .row {
+    width: 100%;
+    padding: 0.2em 0.5em;
+    border-radius: 3rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .row-with-hover-effect {
+    @extend .row;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .horizontal-gap {
+    height: 6rem;
+  }
+
+  .vertical-gap {
+    width: 6rem;
+  }
+
+  .big-icon {
+    width: 1.2em;
+    height: 1.2em;
+  }
+
+  .dim {
+    color: var(--textColorDim);
+  }
+
+  .backdrop-blur {
+    backdrop-filter: blur(10rem);
+  }
+}

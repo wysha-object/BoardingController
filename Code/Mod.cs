@@ -1,8 +1,13 @@
 ﻿using System.Reflection;
+using BoardingController.Systems.Simulation;
 using Colossal.Logging;
 using Game;
 using Game.Modding;
+using Game.Pathfind;
 using Game.SceneFlow;
+using Game.Simulation;
+using GameBoardingController.Systems.Pathfind;
+using Unity.Entities;
 
 namespace BoardingController
 {
@@ -39,7 +44,17 @@ namespace BoardingController
             SetupSystem(updateSystem);
         }
 
-        private void SetupSystem(UpdateSystem updateSystem) { }
+        private void SetupSystem(UpdateSystem updateSystem)
+        {
+            //updateSystem.World.GetOrCreateSystemManaged<RoutesModifiedSystem>().Enabled = false;
+            updateSystem.World.GetOrCreateSystemManaged<TransportCarAISystem>().Enabled = false;
+
+            //updateSystem.UpdateAt<PatchedRoutesModifiedSystem>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateAt<PatchedTransportCarAISystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<PatchedTransportCarAISystem>(SystemUpdatePhase.LoadSimulation);
+            updateSystem.UpdateAt<Systems.Tool.ToolSystem>(SystemUpdatePhase.ToolUpdate);
+            updateSystem.UpdateAt<Systems.UI.UISystem>(SystemUpdatePhase.UIUpdate);
+        }
 
         public void OnDispose()
         {
