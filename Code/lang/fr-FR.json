@@ -1,5 +1,4 @@
 {
-    "BoardingController": "Boarding Controller",
     "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "Version",
     "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Release Channel",
     "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Version",
