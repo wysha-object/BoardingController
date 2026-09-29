@@ -473,7 +473,7 @@ namespace GameBoardingController.Systems.Pathfind
                         Game.Routes.Segment segment = nativeArray13[k];
                         DynamicBuffer<RouteWaypoint> routeWaypointBuffer = m_Waypoints[owner3.m_Owner];
                         DynamicBuffer<RouteSegment> routeSegmentBuffer = m_RouteSegmentLookup[owner3.m_Owner];
-                        int leaderIndex = WaypointUtils.GetLeaderIndex(m_CustomWaypointLookup, routeWaypointBuffer, segment.m_Index, out int linkedCount);
+                        int leaderIndex = WaypointUtils.GetLeaderIndex(ref m_CustomWaypointLookup, routeWaypointBuffer, segment.m_Index, out int linkedCount);
                         int groupLastIndex = math.select((leaderIndex + linkedCount - 1) % routeWaypointBuffer.Length, segment.m_Index, linkedCount >= routeWaypointBuffer.Length);
                         if (!m_RouteInfoLookup.TryGetComponent(routeSegmentBuffer[groupLastIndex].m_Segment, out var routeInfo))
                         {
@@ -489,7 +489,7 @@ namespace GameBoardingController.Systems.Pathfind
                         else
                         {
                             nextLeaderIndex = WaypointUtils.GetLeaderIndex(
-                                m_CustomWaypointLookup,
+                                ref m_CustomWaypointLookup,
                                 routeWaypointBuffer,
                                 (leaderIndex + linkedCount) % routeWaypointBuffer.Length,
                                 out nextLinkedCount
@@ -1195,7 +1195,7 @@ namespace GameBoardingController.Systems.Pathfind
                         Game.Routes.Segment segment = nativeArray13[k];
                         DynamicBuffer<RouteWaypoint> routeWaypointBuffer = m_Waypoints[owner3.m_Owner];
                         DynamicBuffer<RouteSegment> routeSegmentBuffer = m_RouteSegmentLookup[owner3.m_Owner];
-                        int leaderIndex = WaypointUtils.GetLeaderIndex(m_CustomWaypointLookup, routeWaypointBuffer, segment.m_Index, out int linkedCount);
+                        int leaderIndex = WaypointUtils.GetLeaderIndex(ref m_CustomWaypointLookup, routeWaypointBuffer, segment.m_Index, out int linkedCount);
                         int groupLastIndex = math.select((leaderIndex + linkedCount - 1) % routeWaypointBuffer.Length, segment.m_Index, linkedCount >= routeWaypointBuffer.Length);
                         if (!m_RouteInfoLookup.TryGetComponent(routeSegmentBuffer[groupLastIndex].m_Segment, out var routeInfo))
                         {
@@ -1211,7 +1211,7 @@ namespace GameBoardingController.Systems.Pathfind
                         else
                         {
                             nextLeaderIndex = WaypointUtils.GetLeaderIndex(
-                                m_CustomWaypointLookup,
+                                ref m_CustomWaypointLookup,
                                 routeWaypointBuffer,
                                 (leaderIndex + linkedCount) % routeWaypointBuffer.Length,
                                 out nextLinkedCount

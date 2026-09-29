@@ -11,15 +11,15 @@ namespace BoardingController.Utils
 {
     public static class WaypointUtils
     {
-        public static int SelectNextWaypoint(ComponentLookup<CustomWaypoint> customWaypointLookup, DynamicBuffer<RouteWaypoint> routeWaypointBuffer, int currentIndex)
+        public static int SelectNextWaypoint(ref ComponentLookup<CustomWaypoint> customWaypointLookup, DynamicBuffer<RouteWaypoint> routeWaypointBuffer, int currentIndex)
         {
-            int leaderIndex = GetLeaderIndex(customWaypointLookup, routeWaypointBuffer, currentIndex, out int linkedCount);
+            int leaderIndex = GetLeaderIndex(ref customWaypointLookup, routeWaypointBuffer, currentIndex, out int linkedCount);
             if (linkedCount == routeWaypointBuffer.Length)
             {
                 return (currentIndex + 1) % routeWaypointBuffer.Length;
             }
 
-            int nextLeaderIndex = GetLeaderIndex(customWaypointLookup, routeWaypointBuffer, (leaderIndex + linkedCount) % routeWaypointBuffer.Length, out int nextLinkedCount);
+            int nextLeaderIndex = GetLeaderIndex(ref customWaypointLookup, routeWaypointBuffer, (leaderIndex + linkedCount) % routeWaypointBuffer.Length, out int nextLinkedCount);
             Entity nextLeaderWaypointEntity = routeWaypointBuffer[nextLeaderIndex].m_Waypoint;
             int nextIndex;
             if (customWaypointLookup.TryGetComponent(nextLeaderWaypointEntity, out CustomWaypoint nextLeaderCustomWaypoint))
@@ -37,7 +37,7 @@ namespace BoardingController.Utils
             return nextIndex;
         }
 
-        public static int GetLeaderIndex(ComponentLookup<CustomWaypoint> customWaypointLookup, DynamicBuffer<RouteWaypoint> routeWaypointBuffer, int index, out int linkedCount)
+        public static int GetLeaderIndex(ref ComponentLookup<CustomWaypoint> customWaypointLookup, DynamicBuffer<RouteWaypoint> routeWaypointBuffer, int index, out int linkedCount)
         {
             var leaderIndex = index;
             linkedCount = 1;

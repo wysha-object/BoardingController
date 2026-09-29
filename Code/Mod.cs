@@ -51,10 +51,12 @@ namespace BoardingController
             updateSystem.World.GetOrCreateSystemManaged<SegmentCurveSystem>().Enabled = false;
             //updateSystem.World.GetOrCreateSystemManaged<RoutesModifiedSystem>().Enabled = false;
             updateSystem.World.GetOrCreateSystemManaged<TransportCarAISystem>().Enabled = false;
+            updateSystem.World.GetOrCreateSystemManaged<ResidentAISystem>().Enabled = false;
 
             updateSystem.UpdateAt<PatchedSegmentCurveSystem>(SystemUpdatePhase.Modification5);
             //updateSystem.UpdateAt<PatchedRoutesModifiedSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<PatchedTransportCarAISystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateBefore<PatchedResidentAISystem, ResidentAISystem.Actions>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAt<PatchedTransportCarAISystem>(SystemUpdatePhase.LoadSimulation);
             updateSystem.UpdateAt<Systems.UI.UISystem>(SystemUpdatePhase.UIUpdate);
         }

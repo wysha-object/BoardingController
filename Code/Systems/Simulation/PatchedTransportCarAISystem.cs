@@ -1236,7 +1236,7 @@ namespace BoardingController.Systems.Simulation
                 VehicleUtils.SetTarget(
                     ref pathOwnerData,
                     ref targetData,
-                    dynamicBuffer[WaypointUtils.SelectNextWaypoint(m_CustomWaypointLookup, dynamicBuffer, m_WaypointData[targetData.m_Target].m_Index)].m_Waypoint
+                    dynamicBuffer[WaypointUtils.SelectNextWaypoint(ref m_CustomWaypointLookup, dynamicBuffer, m_WaypointData[targetData.m_Target].m_Index)].m_Waypoint
                 );
             }
 
