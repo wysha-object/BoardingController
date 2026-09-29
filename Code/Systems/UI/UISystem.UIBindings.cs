@@ -16,23 +16,8 @@ namespace BoardingController.Systems.UI
 {
     public partial class UISystem
     {
-        private ValueBinding<int> m_GetToolStateBinding;
-
         private void AddUIBindings()
         {
-            AddBinding(m_GetToolStateBinding = new ValueBinding<int>("BoardingController", "GetToolState", (int)ToolState.Disabled));
-
-            AddBinding(
-                new CallBinding<int, string>(
-                    "BoardingController",
-                    "SetToolState",
-                    (inputValue) =>
-                    {
-                        SetToolState((ToolState)inputValue);
-                        return "";
-                    }
-                )
-            );
             AddBinding(
                 new CallBinding<string, string>(
                     "BoardingController",
@@ -105,6 +90,17 @@ namespace BoardingController.Systems.UI
                         }
 
                         EntityManager.AddComponentData(inputValue.entity, customWaypoint);
+                        if (
+                            EntityManager.TryGetComponent<Game.Routes.Waypoint>(inputValue.entity, out var waypoint)
+                            && EntityManager.TryGetComponent<Owner>(inputValue.entity, out var owner)
+                            && EntityManager.TryGetBuffer<RouteSegment>(owner.m_Owner, true, out var routeSegmentBuffer)
+                        )
+                        {
+                            EntityManager.AddComponentData(m_SelectedInfoUISystem.selectedEntity, new Updated());
+                            EntityManager.AddComponentData(owner.m_Owner, new Updated());
+                            EntityManager.AddComponentData(inputValue.entity, new Updated());
+                            EntityManager.AddComponentData(routeSegmentBuffer[waypoint.m_Index].m_Segment, new Updated());
+                        }
                         return "";
                     }
                 )
