@@ -13,7 +13,6 @@ const register: ModRegistrar = (moduleRegistry) => {
 
 const LineItemExtend: ModuleRegistryExtend = (CurrLineItem) => {
     return (props: any) => {
-
         const [waypoints, setWaypoints] = useState<Waypoint[]>([])
         const prevWaypointsJsonString = useRef<string>("")
 
@@ -51,11 +50,12 @@ const LineItemExtend: ModuleRegistryExtend = (CurrLineItem) => {
 const WaypointItem = (props: { waypoint: Waypoint, onUpdate: (dependsOn: Promise<void>) => void }) => {
     const { t } = useTranslate()
     return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '0 1em' }}>
             <div >
                 {`#${props.waypoint.entity.index}`}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', flex: '1' }}>
+                <div style={{ flex: '1' }}/>
                 <Button
                     variant='icon'
                     onClick={() => {

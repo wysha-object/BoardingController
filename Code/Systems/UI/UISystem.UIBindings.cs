@@ -25,7 +25,7 @@ namespace BoardingController.Systems.UI
                     (inputJsonString) =>
                     {
                         var inputValue = JsonConvert.DeserializeAnonymousType(inputJsonString, new { line = Entity.Null });
-                        var rs = new List<Waypoint>();
+                        var rs = new List<UITypes.Waypoint>();
                         if (EntityManager.TryGetBuffer(inputValue.line, true, out DynamicBuffer<RouteWaypoint> routeWaypointBuffer))
                         {
                             for (int i = 0; i < routeWaypointBuffer.Length; i++)
@@ -59,7 +59,13 @@ namespace BoardingController.Systems.UI
                                             customWaypoint = new CustomWaypoint();
                                         }
 
-                                        rs.Add(new Waypoint() { entity = routeWaypoint.m_Waypoint, isLinked = (customWaypoint.m_Options & CustomWaypoint.Options.Linked) != 0 });
+                                        rs.Add(
+                                            new UITypes.Waypoint
+                                            {
+                                                entity = new UITypes.Entity { index = routeWaypoint.m_Waypoint.Index, version = routeWaypoint.m_Waypoint.Version },
+                                                isLinked = (customWaypoint.m_Options & CustomWaypoint.Options.Linked) != 0,
+                                            }
+                                        );
                                     }
                                 }
                             }
@@ -74,8 +80,9 @@ namespace BoardingController.Systems.UI
                     "SetWaypoint",
                     (inputJsonString) =>
                     {
-                        var inputValue = JsonConvert.DeserializeAnonymousType(inputJsonString, new Waypoint());
-                        if (!EntityManager.TryGetComponent(inputValue.entity, out CustomWaypoint customWaypoint))
+                        var inputValue = JsonConvert.DeserializeAnonymousType(inputJsonString, new UITypes.Waypoint());
+                        var entity = new Entity { Index = inputValue.entity.index, Version = inputValue.entity.version };
+                        if (!EntityManager.TryGetComponent(entity, out CustomWaypoint customWaypoint))
                         {
                             customWaypoint = new CustomWaypoint();
                         }
@@ -89,16 +96,16 @@ namespace BoardingController.Systems.UI
                             customWaypoint.m_Options &= ~CustomWaypoint.Options.Linked;
                         }
 
-                        EntityManager.AddComponentData(inputValue.entity, customWaypoint);
+                        EntityManager.AddComponentData(entity, customWaypoint);
                         if (
-                            EntityManager.TryGetComponent<Game.Routes.Waypoint>(inputValue.entity, out var waypoint)
-                            && EntityManager.TryGetComponent<Owner>(inputValue.entity, out var owner)
+                            EntityManager.TryGetComponent<Game.Routes.Waypoint>(entity, out var waypoint)
+                            && EntityManager.TryGetComponent<Owner>(entity, out var owner)
                             && EntityManager.TryGetBuffer<RouteSegment>(owner.m_Owner, true, out var routeSegmentBuffer)
                         )
                         {
                             EntityManager.AddComponentData(m_SelectedInfoUISystem.selectedEntity, new Updated());
                             EntityManager.AddComponentData(owner.m_Owner, new Updated());
-                            EntityManager.AddComponentData(inputValue.entity, new Updated());
+                            EntityManager.AddComponentData(entity, new Updated());
                             EntityManager.AddComponentData(routeSegmentBuffer[waypoint.m_Index].m_Segment, new Updated());
                         }
                         return "";

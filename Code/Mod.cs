@@ -8,7 +8,6 @@ using Game.Pathfind;
 using Game.Routes;
 using Game.SceneFlow;
 using Game.Simulation;
-using Game.Tools;
 using GameBoardingController.Systems.Pathfind;
 
 namespace BoardingController
@@ -48,13 +47,13 @@ namespace BoardingController
 
         private void SetupSystem(UpdateSystem updateSystem)
         {
-            updateSystem.World.GetOrCreateSystemManaged<SegmentCurveSystem>().Enabled = false;
-            //updateSystem.World.GetOrCreateSystemManaged<RoutesModifiedSystem>().Enabled = false;
+            updateSystem.World.GetOrCreateSystemManaged<RoutesModifiedSystem>().Enabled = false;
+            updateSystem.World.GetOrCreateSystemManaged<RoutePathSystem>().Enabled = false;
             updateSystem.World.GetOrCreateSystemManaged<TransportCarAISystem>().Enabled = false;
             updateSystem.World.GetOrCreateSystemManaged<ResidentAISystem>().Enabled = false;
 
-            updateSystem.UpdateAt<PatchedSegmentCurveSystem>(SystemUpdatePhase.Modification5);
-            //updateSystem.UpdateAt<PatchedRoutesModifiedSystem>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateAt<PatchedRoutesModifiedSystem>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateAt<PatchedRoutePathSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<PatchedTransportCarAISystem>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateBefore<PatchedResidentAISystem, ResidentAISystem.Actions>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAt<PatchedTransportCarAISystem>(SystemUpdatePhase.LoadSimulation);

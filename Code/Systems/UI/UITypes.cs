@@ -7,8 +7,14 @@ using Unity.Entities;
 
 namespace BoardingController.Systems.UI
 {
-    public partial class UISystem
+    public static class UITypes
     {
+        public struct Entity
+        {
+            public int index;
+            public int version;
+        }
+
         public struct Waypoint
         {
             public Entity entity;

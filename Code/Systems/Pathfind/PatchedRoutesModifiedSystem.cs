@@ -126,15 +126,6 @@ namespace GameBoardingController.Systems.Pathfind
             [WriteOnly]
             public NativeArray<CreateActionData> m_Actions;
 
-            [ReadOnly]
-            public ComponentLookup<CustomWaypoint> m_CustomWaypointLookup;
-
-            [ReadOnly]
-            public ComponentLookup<RouteInfo> m_RouteInfoLookup;
-
-            [ReadOnly]
-            public BufferLookup<RouteSegment> m_RouteSegmentLookup;
-
             public void Execute()
             {
                 int num = 0;
@@ -158,12 +149,12 @@ namespace GameBoardingController.Systems.Pathfind
                         for (int j = 0; j < nativeArray.Length; j++)
                         {
                             Entity entity = nativeArray[j];
-                            AccessLane accessLane = default(AccessLane);
+                            AccessLane accessLane = default;
                             if (nativeArray3.Length != 0)
                             {
                                 accessLane = nativeArray3[j];
                             }
-                            Game.Objects.SpawnLocation spawnLocation = default(Game.Objects.SpawnLocation);
+                            Game.Objects.SpawnLocation spawnLocation = default;
                             if (nativeArray5.Length != 0)
                             {
                                 spawnLocation = nativeArray5[j];
@@ -201,12 +192,12 @@ namespace GameBoardingController.Systems.Pathfind
                             if (nativeArray6.Length != 0)
                             {
                                 value.m_EndNode = new PathNode(entity, 0);
-                                Owner owner = default(Owner);
+                                Owner owner = default;
                                 if (nativeArray2.Length != 0)
                                 {
                                     owner = nativeArray2[j];
                                 }
-                                Game.Routes.TransportStop transportStop = default(Game.Routes.TransportStop);
+                                Game.Routes.TransportStop transportStop = default;
                                 bool isWaypoint = true;
                                 if (nativeArray8.Length != 0)
                                 {
@@ -217,7 +208,7 @@ namespace GameBoardingController.Systems.Pathfind
                                         isWaypoint = false;
                                     }
                                 }
-                                WaitingPassengers waitingPassengers = default(WaitingPassengers);
+                                WaitingPassengers waitingPassengers = default;
                                 if (nativeArray12.Length != 0)
                                 {
                                     waitingPassengers = nativeArray12[j];
@@ -235,7 +226,7 @@ namespace GameBoardingController.Systems.Pathfind
                             }
                             else
                             {
-                                RouteLane routeLane = default(RouteLane);
+                                RouteLane routeLane = default;
                                 if (nativeArray4.Length != 0)
                                 {
                                     routeLane = nativeArray4[j];
@@ -437,12 +428,12 @@ namespace GameBoardingController.Systems.Pathfind
                                 if (nativeArray11.Length != 0)
                                 {
                                     TaxiStand taxiStand = nativeArray11[j];
-                                    Game.Routes.TransportStop transportStop2 = default(Game.Routes.TransportStop);
+                                    Game.Routes.TransportStop transportStop2 = default;
                                     if (m_TransportStopData.HasComponent(entity))
                                     {
                                         transportStop2 = m_TransportStopData[entity];
                                     }
-                                    WaitingPassengers waitingPassengers2 = default(WaitingPassengers);
+                                    WaitingPassengers waitingPassengers2 = default;
                                     if (nativeArray12.Length != 0)
                                     {
                                         waitingPassengers2 = nativeArray12[j];
@@ -471,51 +462,29 @@ namespace GameBoardingController.Systems.Pathfind
                         Entity owner2 = nativeArray[k];
                         Owner owner3 = nativeArray2[k];
                         Game.Routes.Segment segment = nativeArray13[k];
-                        DynamicBuffer<RouteWaypoint> routeWaypointBuffer = m_Waypoints[owner3.m_Owner];
-                        DynamicBuffer<RouteSegment> routeSegmentBuffer = m_RouteSegmentLookup[owner3.m_Owner];
-                        int leaderIndex = WaypointUtils.GetLeaderIndex(ref m_CustomWaypointLookup, routeWaypointBuffer, segment.m_Index, out int linkedCount);
-                        int groupLastIndex = math.select((leaderIndex + linkedCount - 1) % routeWaypointBuffer.Length, segment.m_Index, linkedCount >= routeWaypointBuffer.Length);
-                        if (!m_RouteInfoLookup.TryGetComponent(routeSegmentBuffer[groupLastIndex].m_Segment, out var routeInfo))
+                        RouteInfo routeInfo = default;
+                        if (nativeArray14.Length != 0)
                         {
-                            routeInfo = default(RouteInfo);
+                            routeInfo = nativeArray14[k];
                         }
-                        int nextLeaderIndex;
-                        int nextLinkedCount;
-                        if (linkedCount >= routeWaypointBuffer.Length)
-                        {
-                            nextLeaderIndex = (segment.m_Index + 1) % routeWaypointBuffer.Length;
-                            nextLinkedCount = 1;
-                        }
-                        else
-                        {
-                            nextLeaderIndex = WaypointUtils.GetLeaderIndex(
-                                ref m_CustomWaypointLookup,
-                                routeWaypointBuffer,
-                                (leaderIndex + linkedCount) % routeWaypointBuffer.Length,
-                                out nextLinkedCount
-                            );
-                        }
-                        Entity waypoint = routeWaypointBuffer[segment.m_Index].m_Waypoint;
+                        DynamicBuffer<RouteWaypoint> dynamicBuffer = m_Waypoints[owner3.m_Owner];
+                        int index = math.select(segment.m_Index + 1, 0, segment.m_Index == dynamicBuffer.Length - 1);
+                        Entity waypoint = dynamicBuffer[segment.m_Index].m_Waypoint;
+                        Entity waypoint2 = dynamicBuffer[index].m_Waypoint;
                         Position position = m_PositionData[waypoint];
+                        Position position2 = m_PositionData[waypoint2];
                         TransportLineData transportLineData2 = GetTransportLineData(owner3.m_Owner, out var _);
                         PathfindTransportData transportLinePathfindData2 = GetTransportLinePathfindData(transportLineData2);
-                        for (int j = 0; j < nextLinkedCount; j++)
+                        CreateActionData value2 = new CreateActionData
                         {
-                            int nextIndex = (nextLeaderIndex + j) % routeWaypointBuffer.Length;
-
-                            Entity waypoint2 = routeWaypointBuffer[nextIndex].m_Waypoint;
-                            Position position2 = m_PositionData[waypoint2];
-                            CreateActionData value2 = new CreateActionData
-                            {
-                                m_Owner = owner2,
-                                m_StartNode = new PathNode(waypoint, 0),
-                                m_MiddleNode = new PathNode(owner2, 0),
-                                m_EndNode = new PathNode(waypoint2, 0),
-                                m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
-                                m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
-                            };
-                            m_Actions[num++] = value2;
-                        }
+                            m_Owner = owner2,
+                            m_StartNode = new PathNode(waypoint, 0),
+                            m_MiddleNode = new PathNode(owner2, 0),
+                            m_EndNode = new PathNode(waypoint2, 0),
+                            m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
+                            m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
+                        };
+                        m_Actions[num++] = value2;
                     }
                 }
             }
@@ -527,7 +496,7 @@ namespace GameBoardingController.Systems.Pathfind
                 {
                     return m_PrefabSpawnLocationData[prefabRef.m_Prefab];
                 }
-                return default(SpawnLocationData);
+                return default;
             }
 
             private RouteConnectionData GetRouteConnectionData(Entity entity)
@@ -537,7 +506,7 @@ namespace GameBoardingController.Systems.Pathfind
                 {
                     return m_PrefabRouteConnectionData[prefabRef.m_Prefab];
                 }
-                return default(RouteConnectionData);
+                return default;
             }
 
             private TransportLineData GetTransportLineData(Entity owner, out TransportLine transportLine)
@@ -548,8 +517,8 @@ namespace GameBoardingController.Systems.Pathfind
                     PrefabRef prefabRef = m_PrefabRefData[owner];
                     return m_PrefabTransportLineData[prefabRef.m_Prefab];
                 }
-                transportLine = default(TransportLine);
-                return default(TransportLineData);
+                transportLine = default;
+                return default;
             }
 
             private PathfindTransportData GetTransportLinePathfindData(TransportLineData transportLineData)
@@ -558,7 +527,7 @@ namespace GameBoardingController.Systems.Pathfind
                 {
                     return m_TransportPathfindData[transportLineData.m_PathfindPrefab];
                 }
-                return default(PathfindTransportData);
+                return default;
             }
 
             private PathfindTransportData GetNetLaneTransportPathfindData(Entity lane)
@@ -575,7 +544,7 @@ namespace GameBoardingController.Systems.Pathfind
                         }
                     }
                 }
-                return default(PathfindTransportData);
+                return default;
             }
 
             private PathSpecification GetSpawnLocationPathSpecification(
@@ -593,7 +562,7 @@ namespace GameBoardingController.Systems.Pathfind
                 bool secondaryEnd
             )
             {
-                NetLaneData netLaneData = default(NetLaneData);
+                NetLaneData netLaneData = default;
                 if (m_PrefabRefData.HasComponent(lane))
                 {
                     PrefabRef prefabRef = m_PrefabRefData[lane];
@@ -627,7 +596,7 @@ namespace GameBoardingController.Systems.Pathfind
                                 secondaryEnd
                             );
                         }
-                        PathfindPedestrianData pedestrianPathfindData = default(PathfindPedestrianData);
+                        PathfindPedestrianData pedestrianPathfindData = default;
                         if (m_PedestrianPathfindData.HasComponent(netLaneData.m_PathfindPrefab))
                         {
                             pedestrianPathfindData = m_PedestrianPathfindData[netLaneData.m_PathfindPrefab];
@@ -660,7 +629,7 @@ namespace GameBoardingController.Systems.Pathfind
                                 secondaryEnd
                             );
                         }
-                        Game.Net.CarLane carLane = default(Game.Net.CarLane);
+                        Game.Net.CarLane carLane = default;
                         if (m_CarLaneData.HasComponent(lane))
                         {
                             carLane = m_CarLaneData[lane];
@@ -669,7 +638,7 @@ namespace GameBoardingController.Systems.Pathfind
                         {
                             carLane.m_SpeedLimit = 277.77777f;
                         }
-                        PathfindCarData carPathfindData = default(PathfindCarData);
+                        PathfindCarData carPathfindData = default;
                         if (m_CarPathfindData.HasComponent(netLaneData.m_PathfindPrefab))
                         {
                             carPathfindData = m_CarPathfindData[netLaneData.m_PathfindPrefab];
@@ -707,7 +676,7 @@ namespace GameBoardingController.Systems.Pathfind
                                 secondaryEnd
                             );
                         }
-                        PathfindTrackData trackPathfindData = default(PathfindTrackData);
+                        PathfindTrackData trackPathfindData = default;
                         if (m_TrackPathfindData.HasComponent(netLaneData.m_PathfindPrefab))
                         {
                             trackPathfindData = m_TrackPathfindData[netLaneData.m_PathfindPrefab];
@@ -716,7 +685,7 @@ namespace GameBoardingController.Systems.Pathfind
                     }
                     case RouteConnectionType.Air:
                     {
-                        PathfindConnectionData connectionPathfindData = default(PathfindConnectionData);
+                        PathfindConnectionData connectionPathfindData = default;
                         if (m_ConnectionPathfindData.HasComponent(netLaneData.m_PathfindPrefab))
                         {
                             connectionPathfindData = m_ConnectionPathfindData[netLaneData.m_PathfindPrefab];
@@ -735,7 +704,7 @@ namespace GameBoardingController.Systems.Pathfind
                         );
                     }
                     default:
-                        return default(PathSpecification);
+                        return default;
                 }
             }
         }
@@ -842,8 +811,7 @@ namespace GameBoardingController.Systems.Pathfind
             [ReadOnly]
             public BufferLookup<RouteWaypoint> m_Waypoints;
 
-            [WriteOnly]
-            public NativeArray<UpdateActionData> m_Actions;
+            public BufferTypeHandle<ExtraSegmentRef> m_CustomSegmentRefType;
 
             [ReadOnly]
             public ComponentLookup<Connected> m_ConnectedLookup;
@@ -857,9 +825,16 @@ namespace GameBoardingController.Systems.Pathfind
             [ReadOnly]
             public BufferLookup<RouteSegment> m_RouteSegmentLookup;
 
+            public EntityCommandBuffer m_EntityCommandBuffer;
+
+            public NativeList<CreateActionData> m_CreateActionDataList;
+
+            public NativeList<UpdateActionData> m_UpdateActionDataList;
+
+            public NativeList<DeleteActionData> m_DeleteActionDataList;
+
             public void Execute()
             {
-                int num = 0;
                 for (int i = 0; i < m_Chunks.Length; i++)
                 {
                     ArchetypeChunk archetypeChunk = m_Chunks[i];
@@ -868,6 +843,7 @@ namespace GameBoardingController.Systems.Pathfind
                     NativeArray<AccessLane> nativeArray3 = archetypeChunk.GetNativeArray(ref m_AccessLaneType);
                     NativeArray<RouteLane> nativeArray4 = archetypeChunk.GetNativeArray(ref m_RouteLaneType);
                     NativeArray<Game.Objects.SpawnLocation> nativeArray5 = archetypeChunk.GetNativeArray(ref m_SpawnLocationType);
+                    BufferAccessor<ExtraSegmentRef> extraSegmentAccessor = archetypeChunk.GetBufferAccessor(ref m_CustomSegmentRefType);
                     if (nativeArray3.Length != 0 || nativeArray4.Length != 0 || nativeArray5.Length != 0)
                     {
                         NativeArray<Waypoint> nativeArray6 = archetypeChunk.GetNativeArray(ref m_WaypointType);
@@ -1179,7 +1155,7 @@ namespace GameBoardingController.Systems.Pathfind
                                     );
                                 }
                             }
-                            m_Actions[num++] = value;
+                            m_UpdateActionDataList.Add(value);
                         }
                     }
                     NativeArray<Game.Routes.Segment> nativeArray13 = archetypeChunk.GetNativeArray(ref m_SegmentType);
@@ -1195,6 +1171,15 @@ namespace GameBoardingController.Systems.Pathfind
                         Game.Routes.Segment segment = nativeArray13[k];
                         DynamicBuffer<RouteWaypoint> routeWaypointBuffer = m_Waypoints[owner3.m_Owner];
                         DynamicBuffer<RouteSegment> routeSegmentBuffer = m_RouteSegmentLookup[owner3.m_Owner];
+                        DynamicBuffer<ExtraSegmentRef> extraSegmentBuffer;
+                        if (extraSegmentAccessor.Length != 0)
+                        {
+                            extraSegmentBuffer = extraSegmentAccessor[k];
+                        }
+                        else
+                        {
+                            extraSegmentBuffer = m_EntityCommandBuffer.AddBuffer<ExtraSegmentRef>(owner2);
+                        }
                         int leaderIndex = WaypointUtils.GetLeaderIndex(ref m_CustomWaypointLookup, routeWaypointBuffer, segment.m_Index, out int linkedCount);
                         int groupLastIndex = math.select((leaderIndex + linkedCount - 1) % routeWaypointBuffer.Length, segment.m_Index, linkedCount >= routeWaypointBuffer.Length);
                         if (!m_RouteInfoLookup.TryGetComponent(routeSegmentBuffer[groupLastIndex].m_Segment, out var routeInfo))
@@ -1224,19 +1209,56 @@ namespace GameBoardingController.Systems.Pathfind
                         for (int j = 0; j < nextLinkedCount; j++)
                         {
                             int nextIndex = (nextLeaderIndex + j) % routeWaypointBuffer.Length;
+                            Entity owner;
+                            bool isNew = false;
+                            if (j == 0)
+                            {
+                                owner = owner2;
+                            }
+                            else
+                            {
+                                int extraIndex = j - 1;
+                                if (extraIndex >= extraSegmentBuffer.Length)
+                                {
+                                    extraSegmentBuffer.Add(new ExtraSegmentRef { m_CustomSegment = m_EntityCommandBuffer.CreateEntity() });
+                                    isNew = true;
+                                }
+                                owner = extraSegmentBuffer[extraIndex].m_CustomSegment;
+                            }
 
                             Entity waypoint2 = routeWaypointBuffer[nextIndex].m_Waypoint;
                             Position position2 = m_PositionData[waypoint2];
-                            UpdateActionData value2 = new UpdateActionData
+                            if (isNew)
                             {
-                                m_Owner = owner2,
-                                m_StartNode = new PathNode(waypoint, 0),
-                                m_MiddleNode = new PathNode(owner2, 0),
-                                m_EndNode = new PathNode(waypoint2, 0),
-                                m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
-                                m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
-                            };
-                            m_Actions[num++] = value2;
+                                CreateActionData value3 = new CreateActionData
+                                {
+                                    m_Owner = owner,
+                                    m_StartNode = new PathNode(waypoint, 0),
+                                    m_MiddleNode = new PathNode(owner, 0),
+                                    m_EndNode = new PathNode(waypoint2, 0),
+                                    m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
+                                    m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
+                                };
+                                m_CreateActionDataList.Add(value3);
+                            }
+                            else
+                            {
+                                UpdateActionData value2 = new UpdateActionData
+                                {
+                                    m_Owner = owner,
+                                    m_StartNode = new PathNode(waypoint, 0),
+                                    m_MiddleNode = new PathNode(owner, 0),
+                                    m_EndNode = new PathNode(waypoint2, 0),
+                                    m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
+                                    m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
+                                };
+                                m_UpdateActionDataList.Add(value2);
+                            }
+                        }
+                        for (int j = nextLinkedCount - 1; j < extraSegmentBuffer.Length; j++)
+                        {
+                            DeleteActionData value = new DeleteActionData { m_Owner = extraSegmentBuffer[j].m_CustomSegment };
+                            m_DeleteActionDataList.Add(value);
                         }
                     }
                 }
@@ -1488,19 +1510,30 @@ namespace GameBoardingController.Systems.Pathfind
             [ReadOnly]
             public EntityTypeHandle m_EntityType;
 
-            [WriteOnly]
-            public NativeArray<DeleteActionData> m_Actions;
+            [ReadOnly]
+            public BufferTypeHandle<ExtraSegmentRef> m_ExtraSegmentRefType;
+
+            public NativeList<DeleteActionData> m_DeleteActionDataList;
 
             public void Execute()
             {
-                int num = 0;
                 for (int i = 0; i < m_Chunks.Length; i++)
                 {
                     NativeArray<Entity> nativeArray = m_Chunks[i].GetNativeArray(m_EntityType);
+                    BufferAccessor<ExtraSegmentRef> extraSegmentAccessor = m_Chunks[i].GetBufferAccessor(ref m_ExtraSegmentRefType);
                     for (int j = 0; j < nativeArray.Length; j++)
                     {
                         DeleteActionData value = new DeleteActionData { m_Owner = nativeArray[j] };
-                        m_Actions[num++] = value;
+                        m_DeleteActionDataList.Add(value);
+                        if (extraSegmentAccessor.Length != 0)
+                        {
+                            DynamicBuffer<ExtraSegmentRef> extraSegmentBuffer = extraSegmentAccessor[j];
+                            for (int k = 0; k < extraSegmentBuffer.Length; k++)
+                            {
+                                DeleteActionData value2 = new DeleteActionData { m_Owner = extraSegmentBuffer[k].m_CustomSegment };
+                                m_DeleteActionDataList.Add(value2);
+                            }
+                        }
                     }
                 }
             }
@@ -1517,6 +1550,8 @@ namespace GameBoardingController.Systems.Pathfind
         private EntityQuery m_AllSubElementQuery;
 
         private bool m_Loaded;
+
+        private ModificationEndBarrier m_ModificationEndBarrier;
 
         protected override void OnCreate()
         {
@@ -1624,6 +1659,7 @@ namespace GameBoardingController.Systems.Pathfind
                     },
                 }
             );
+            m_ModificationEndBarrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
         }
 
         protected override void OnGameLoaded(Context serializationContext)
@@ -1701,9 +1737,6 @@ namespace GameBoardingController.Systems.Pathfind
                             m_TrackPathfindData = SystemAPI.GetComponentLookup<PathfindTrackData>(true),
                             m_ConnectionPathfindData = SystemAPI.GetComponentLookup<PathfindConnectionData>(true),
                             m_Actions = action.m_CreateData,
-                            m_CustomWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true),
-                            m_RouteInfoLookup = SystemAPI.GetComponentLookup<RouteInfo>(true),
-                            m_RouteSegmentLookup = SystemAPI.GetBufferLookup<RouteSegment>(true),
                         },
                         JobHandle.CombineDependencies(base.Dependency, outJobHandle)
                     );
@@ -1713,7 +1746,9 @@ namespace GameBoardingController.Systems.Pathfind
                 }
                 if (num != 0)
                 {
-                    UpdateAction action2 = new UpdateAction(num, Allocator.Persistent);
+                    NativeList<CreateActionData> createActionDataList = new NativeList<CreateActionData>(Allocator.Persistent);
+                    NativeList<UpdateActionData> updateActionDataList = new NativeList<UpdateActionData>(Allocator.Persistent);
+                    NativeList<DeleteActionData> deleteActionDataList = new NativeList<DeleteActionData>(Allocator.Persistent);
                     NativeList<ArchetypeChunk> chunks2 = m_UpdatedSubElementQuery.ToArchetypeChunkListAsync(Allocator.TempJob, out var outJobHandle2);
                     JobHandle jobHandle3 = IJobExtensions.Schedule(
                         new UpdatePathEdgeJob
@@ -1751,36 +1786,43 @@ namespace GameBoardingController.Systems.Pathfind
                             m_CarPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindCarData>(true),
                             m_TrackPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindTrackData>(true),
                             m_ConnectionPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindConnectionData>(true),
-                            m_Actions = action2.m_UpdateData,
+                            m_CustomSegmentRefType = SystemAPI.GetBufferTypeHandle<ExtraSegmentRef>(false),
                             m_ConnectedLookup = SystemAPI.GetComponentLookup<Connected>(true),
                             m_CustomWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true),
                             m_RouteInfoLookup = SystemAPI.GetComponentLookup<RouteInfo>(true),
                             m_RouteSegmentLookup = SystemAPI.GetBufferLookup<RouteSegment>(true),
+                            m_EntityCommandBuffer = m_ModificationEndBarrier.CreateCommandBuffer(),
+                            m_CreateActionDataList = createActionDataList,
+                            m_UpdateActionDataList = updateActionDataList,
+                            m_DeleteActionDataList = deleteActionDataList,
                         },
                         JobHandle.CombineDependencies(base.Dependency, outJobHandle2)
                     );
                     jobHandle = JobHandle.CombineDependencies(jobHandle, jobHandle3);
                     chunks2.Dispose(jobHandle3);
-                    m_PathfindQueueSystem.Enqueue(action2, jobHandle3);
+                    m_PathfindQueueSystem.Enqueue(new CreateAction { m_CreateData = createActionDataList.AsArray() }, jobHandle3);
+                    m_PathfindQueueSystem.Enqueue(new UpdateAction { m_UpdateData = updateActionDataList.AsArray() }, jobHandle3);
+                    m_PathfindQueueSystem.Enqueue(new DeleteAction { m_DeleteData = deleteActionDataList.AsArray() }, jobHandle3);
                 }
                 if (num3 != 0)
                 {
-                    DeleteAction action3 = new DeleteAction(num3, Allocator.Persistent);
+                    NativeList<DeleteActionData> deleteActionDataList = new NativeList<DeleteActionData>(Allocator.Persistent);
                     NativeList<ArchetypeChunk> chunks3 = m_DeletedSubElementQuery.ToArchetypeChunkListAsync(Allocator.TempJob, out var outJobHandle3);
                     JobHandle jobHandle4 = IJobExtensions.Schedule(
                         new RemovePathEdgeJob
                         {
                             m_Chunks = chunks3,
                             m_EntityType = InternalCompilerInterface.GetEntityTypeHandle(ref __TypeHandle.__Unity_Entities_Entity_TypeHandle, ref base.CheckedStateRef),
-                            m_Actions = action3.m_DeleteData,
+                            m_DeleteActionDataList = deleteActionDataList,
                         },
                         JobHandle.CombineDependencies(base.Dependency, outJobHandle3)
                     );
                     jobHandle = JobHandle.CombineDependencies(jobHandle, jobHandle4);
                     chunks3.Dispose(jobHandle4);
-                    m_PathfindQueueSystem.Enqueue(action3, jobHandle4);
+                    m_PathfindQueueSystem.Enqueue(new DeleteAction { m_DeleteData = deleteActionDataList.AsArray() }, jobHandle4);
                 }
                 base.Dependency = jobHandle;
+                m_ModificationEndBarrier.AddJobHandleForProducer(Dependency);
             }
         }
 
