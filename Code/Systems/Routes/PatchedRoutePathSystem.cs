@@ -335,6 +335,7 @@ namespace BoardingController.Systems.Routes
                 ComponentTypeHandle<PathTargets> typeHandle3 = SystemAPI.GetComponentTypeHandle<PathTargets>(false);
                 ComponentTypeHandle<Temp> typeHandle4 = SystemAPI.GetComponentTypeHandle<Temp>(true);
                 ComponentTypeHandle<PrefabRef> typeHandle5 = SystemAPI.GetComponentTypeHandle<PrefabRef>(true);
+                ComponentLookup<Owner> ownerLookup = SystemAPI.GetComponentLookup<Owner>(true);
                 ComponentLookup<CustomWaypoint> customWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true);
                 BufferLookup<RouteWaypoint> routeWaypointLookup = SystemAPI.GetBufferLookup<RouteWaypoint>(true);
                 CompleteDependency();
@@ -346,7 +347,8 @@ namespace BoardingController.Systems.Routes
                     NativeArray<Owner> nativeArray4 = archetypeChunk.GetNativeArray(ref typeHandle2);
                     NativeArray<PathTargets> nativeArray5 = archetypeChunk.GetNativeArray(ref typeHandle3);
                     NativeArray<PrefabRef> nativeArray6 = archetypeChunk.GetNativeArray(ref typeHandle5);
-                    bool highPriority = archetypeChunk.Has(ref typeHandle4);
+                    NativeArray<Temp> tempArray = archetypeChunk.GetNativeArray(ref typeHandle4);
+                    bool highPriority = tempArray.Length > 0;
                     for (int j = 0; j < nativeArray2.Length; j++)
                     {
                         Entity entity = nativeArray2[j];
@@ -356,8 +358,16 @@ namespace BoardingController.Systems.Routes
                         PrefabRef prefabRef = nativeArray6[j];
                         if (
                             !(
-                                routeWaypointLookup.TryGetBuffer(owner.m_Owner, out var routeWaypointBuffer)
-                                && customWaypointLookup.TryGetComponent(routeWaypointBuffer[segment.m_Index].m_Waypoint, out var customWaypoint)
+                                (
+                                    routeWaypointLookup.TryGetBuffer(owner.m_Owner, out var routeWaypointBuffer)
+                                    && customWaypointLookup.TryGetComponent(routeWaypointBuffer[segment.m_Index].m_Waypoint, out var customWaypoint)
+                                )
+                                || (
+                                    tempArray.Length > 0
+                                    && ownerLookup.TryGetComponent(tempArray[j].m_Original, out var originalOwner)
+                                    && routeWaypointLookup.TryGetBuffer(originalOwner.m_Owner, out var originalRouteWaypointBuffer)
+                                    && customWaypointLookup.TryGetComponent(originalRouteWaypointBuffer[segment.m_Index].m_Waypoint, out customWaypoint)
+                                )
                             )
                         )
                         {
