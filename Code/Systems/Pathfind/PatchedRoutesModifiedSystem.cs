@@ -1750,76 +1750,78 @@ namespace GameBoardingController.Systems.Pathfind
                     NativeList<UpdateActionData> updateActionDataList = new NativeList<UpdateActionData>(Allocator.Persistent);
                     NativeList<DeleteActionData> deleteActionDataList = new NativeList<DeleteActionData>(Allocator.Persistent);
                     NativeList<ArchetypeChunk> chunks2 = m_UpdatedSubElementQuery.ToArchetypeChunkListAsync(Allocator.TempJob, out var outJobHandle2);
-                    JobHandle jobHandle3 = IJobExtensions.Schedule(
-                        new UpdatePathEdgeJob
-                        {
-                            m_Chunks = chunks2,
-                            m_EntityType = SystemAPI.GetEntityTypeHandle(),
-                            m_OwnerType = SystemAPI.GetComponentTypeHandle<Owner>(true),
-                            m_WaypointType = SystemAPI.GetComponentTypeHandle<Waypoint>(true),
-                            m_PositionType = SystemAPI.GetComponentTypeHandle<Position>(true),
-                            m_TransformType = SystemAPI.GetComponentTypeHandle<Transform>(true),
-                            m_AccessLaneType = SystemAPI.GetComponentTypeHandle<AccessLane>(true),
-                            m_RouteLaneType = SystemAPI.GetComponentTypeHandle<RouteLane>(true),
-                            m_SegmentType = SystemAPI.GetComponentTypeHandle<Game.Routes.Segment>(true),
-                            m_TaxiStandType = SystemAPI.GetComponentTypeHandle<TaxiStand>(true),
-                            m_TakeoffLocationType = SystemAPI.GetComponentTypeHandle<Game.Routes.TakeoffLocation>(true),
-                            m_ConnectedType = SystemAPI.GetComponentTypeHandle<Connected>(true),
-                            m_RouteInfoType = SystemAPI.GetComponentTypeHandle<RouteInfo>(true),
-                            m_SpawnLocationType = SystemAPI.GetComponentTypeHandle<Game.Objects.SpawnLocation>(true),
-                            m_WaitingPassengersType = SystemAPI.GetComponentTypeHandle<Game.Routes.WaitingPassengers>(true),
-                            m_PositionData = SystemAPI.GetComponentLookup<Game.Routes.Position>(true),
-                            m_TransportStopData = SystemAPI.GetComponentLookup<Game.Routes.TransportStop>(true),
-                            m_TransportLineData = SystemAPI.GetComponentLookup<Game.Routes.TransportLine>(true),
-                            m_LaneData = SystemAPI.GetComponentLookup<Game.Net.Lane>(true),
-                            m_CurveData = SystemAPI.GetComponentLookup<Game.Net.Curve>(true),
-                            m_CarLaneData = SystemAPI.GetComponentLookup<Game.Net.CarLane>(true),
-                            m_MasterLaneData = SystemAPI.GetComponentLookup<Game.Net.MasterLane>(true),
-                            m_Waypoints = SystemAPI.GetBufferLookup<Game.Routes.RouteWaypoint>(true),
-                            m_PrefabRefData = SystemAPI.GetComponentLookup<Game.Prefabs.PrefabRef>(true),
-                            m_NetLaneData = SystemAPI.GetComponentLookup<Game.Prefabs.NetLaneData>(true),
-                            m_PrefabTransportLineData = SystemAPI.GetComponentLookup<Game.Prefabs.TransportLineData>(true),
-                            m_PrefabRouteConnectionData = SystemAPI.GetComponentLookup<Game.Prefabs.RouteConnectionData>(true),
-                            m_PrefabSpawnLocationData = SystemAPI.GetComponentLookup<Game.Prefabs.SpawnLocationData>(true),
-                            m_TransportPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindTransportData>(true),
-                            m_PedestrianPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindPedestrianData>(true),
-                            m_CarPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindCarData>(true),
-                            m_TrackPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindTrackData>(true),
-                            m_ConnectionPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindConnectionData>(true),
-                            m_CustomSegmentRefType = SystemAPI.GetBufferTypeHandle<ExtraSegmentRef>(false),
-                            m_ConnectedLookup = SystemAPI.GetComponentLookup<Connected>(true),
-                            m_CustomWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true),
-                            m_RouteInfoLookup = SystemAPI.GetComponentLookup<RouteInfo>(true),
-                            m_RouteSegmentLookup = SystemAPI.GetBufferLookup<RouteSegment>(true),
-                            m_EntityCommandBuffer = m_ModificationEndBarrier.CreateCommandBuffer(),
-                            m_CreateActionDataList = createActionDataList,
-                            m_UpdateActionDataList = updateActionDataList,
-                            m_DeleteActionDataList = deleteActionDataList,
-                        },
-                        JobHandle.CombineDependencies(base.Dependency, outJobHandle2)
-                    );
-                    jobHandle = JobHandle.CombineDependencies(jobHandle, jobHandle3);
-                    chunks2.Dispose(jobHandle3);
-                    m_PathfindQueueSystem.Enqueue(new CreateAction { m_CreateData = createActionDataList.AsArray() }, jobHandle3);
-                    m_PathfindQueueSystem.Enqueue(new UpdateAction { m_UpdateData = updateActionDataList.AsArray() }, jobHandle3);
-                    m_PathfindQueueSystem.Enqueue(new DeleteAction { m_DeleteData = deleteActionDataList.AsArray() }, jobHandle3);
+                    IJobExtensions
+                        .Schedule(
+                            new UpdatePathEdgeJob
+                            {
+                                m_Chunks = chunks2,
+                                m_EntityType = SystemAPI.GetEntityTypeHandle(),
+                                m_OwnerType = SystemAPI.GetComponentTypeHandle<Owner>(true),
+                                m_WaypointType = SystemAPI.GetComponentTypeHandle<Waypoint>(true),
+                                m_PositionType = SystemAPI.GetComponentTypeHandle<Position>(true),
+                                m_TransformType = SystemAPI.GetComponentTypeHandle<Transform>(true),
+                                m_AccessLaneType = SystemAPI.GetComponentTypeHandle<AccessLane>(true),
+                                m_RouteLaneType = SystemAPI.GetComponentTypeHandle<RouteLane>(true),
+                                m_SegmentType = SystemAPI.GetComponentTypeHandle<Game.Routes.Segment>(true),
+                                m_TaxiStandType = SystemAPI.GetComponentTypeHandle<TaxiStand>(true),
+                                m_TakeoffLocationType = SystemAPI.GetComponentTypeHandle<Game.Routes.TakeoffLocation>(true),
+                                m_ConnectedType = SystemAPI.GetComponentTypeHandle<Connected>(true),
+                                m_RouteInfoType = SystemAPI.GetComponentTypeHandle<RouteInfo>(true),
+                                m_SpawnLocationType = SystemAPI.GetComponentTypeHandle<Game.Objects.SpawnLocation>(true),
+                                m_WaitingPassengersType = SystemAPI.GetComponentTypeHandle<Game.Routes.WaitingPassengers>(true),
+                                m_PositionData = SystemAPI.GetComponentLookup<Game.Routes.Position>(true),
+                                m_TransportStopData = SystemAPI.GetComponentLookup<Game.Routes.TransportStop>(true),
+                                m_TransportLineData = SystemAPI.GetComponentLookup<Game.Routes.TransportLine>(true),
+                                m_LaneData = SystemAPI.GetComponentLookup<Game.Net.Lane>(true),
+                                m_CurveData = SystemAPI.GetComponentLookup<Game.Net.Curve>(true),
+                                m_CarLaneData = SystemAPI.GetComponentLookup<Game.Net.CarLane>(true),
+                                m_MasterLaneData = SystemAPI.GetComponentLookup<Game.Net.MasterLane>(true),
+                                m_Waypoints = SystemAPI.GetBufferLookup<Game.Routes.RouteWaypoint>(true),
+                                m_PrefabRefData = SystemAPI.GetComponentLookup<Game.Prefabs.PrefabRef>(true),
+                                m_NetLaneData = SystemAPI.GetComponentLookup<Game.Prefabs.NetLaneData>(true),
+                                m_PrefabTransportLineData = SystemAPI.GetComponentLookup<Game.Prefabs.TransportLineData>(true),
+                                m_PrefabRouteConnectionData = SystemAPI.GetComponentLookup<Game.Prefabs.RouteConnectionData>(true),
+                                m_PrefabSpawnLocationData = SystemAPI.GetComponentLookup<Game.Prefabs.SpawnLocationData>(true),
+                                m_TransportPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindTransportData>(true),
+                                m_PedestrianPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindPedestrianData>(true),
+                                m_CarPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindCarData>(true),
+                                m_TrackPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindTrackData>(true),
+                                m_ConnectionPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindConnectionData>(true),
+                                m_CustomSegmentRefType = SystemAPI.GetBufferTypeHandle<ExtraSegmentRef>(false),
+                                m_ConnectedLookup = SystemAPI.GetComponentLookup<Connected>(true),
+                                m_CustomWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true),
+                                m_RouteInfoLookup = SystemAPI.GetComponentLookup<RouteInfo>(true),
+                                m_RouteSegmentLookup = SystemAPI.GetBufferLookup<RouteSegment>(true),
+                                m_EntityCommandBuffer = m_ModificationEndBarrier.CreateCommandBuffer(),
+                                m_CreateActionDataList = createActionDataList,
+                                m_UpdateActionDataList = updateActionDataList,
+                                m_DeleteActionDataList = deleteActionDataList,
+                            },
+                            JobHandle.CombineDependencies(base.Dependency, outJobHandle2)
+                        )
+                        .Complete();
+                    chunks2.Dispose();
+                    m_PathfindQueueSystem.Enqueue(new CreateAction { m_CreateData = createActionDataList.AsArray() }, new JobHandle());
+                    m_PathfindQueueSystem.Enqueue(new UpdateAction { m_UpdateData = updateActionDataList.AsArray() }, new JobHandle());
+                    m_PathfindQueueSystem.Enqueue(new DeleteAction { m_DeleteData = deleteActionDataList.AsArray() }, new JobHandle());
                 }
                 if (num3 != 0)
                 {
                     NativeList<DeleteActionData> deleteActionDataList = new NativeList<DeleteActionData>(Allocator.Persistent);
                     NativeList<ArchetypeChunk> chunks3 = m_DeletedSubElementQuery.ToArchetypeChunkListAsync(Allocator.TempJob, out var outJobHandle3);
-                    JobHandle jobHandle4 = IJobExtensions.Schedule(
-                        new RemovePathEdgeJob
-                        {
-                            m_Chunks = chunks3,
-                            m_EntityType = InternalCompilerInterface.GetEntityTypeHandle(ref __TypeHandle.__Unity_Entities_Entity_TypeHandle, ref base.CheckedStateRef),
-                            m_DeleteActionDataList = deleteActionDataList,
-                        },
-                        JobHandle.CombineDependencies(base.Dependency, outJobHandle3)
-                    );
-                    jobHandle = JobHandle.CombineDependencies(jobHandle, jobHandle4);
-                    chunks3.Dispose(jobHandle4);
-                    m_PathfindQueueSystem.Enqueue(new DeleteAction { m_DeleteData = deleteActionDataList.AsArray() }, jobHandle4);
+                    IJobExtensions
+                        .Schedule(
+                            new RemovePathEdgeJob
+                            {
+                                m_Chunks = chunks3,
+                                m_EntityType = InternalCompilerInterface.GetEntityTypeHandle(ref __TypeHandle.__Unity_Entities_Entity_TypeHandle, ref base.CheckedStateRef),
+                                m_DeleteActionDataList = deleteActionDataList,
+                            },
+                            JobHandle.CombineDependencies(base.Dependency, outJobHandle3)
+                        )
+                        .Complete();
+                    chunks3.Dispose();
+                    m_PathfindQueueSystem.Enqueue(new DeleteAction { m_DeleteData = deleteActionDataList.AsArray() }, new JobHandle());
                 }
                 base.Dependency = jobHandle;
                 m_ModificationEndBarrier.AddJobHandleForProducer(Dependency);
