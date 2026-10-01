@@ -1,4 +1,5 @@
-﻿using BoardingController.Components;
+﻿using System.Collections.Generic;
+using BoardingController.Components;
 using BoardingController.Utils;
 using Colossal.Entities;
 using Colossal.Mathematics;
@@ -1595,10 +1596,11 @@ namespace GameBoardingController.Systems.Pathfind
             BufferLookup<ExtraSegmentRef> extraSegmentLookup = SystemAPI.GetBufferLookup<ExtraSegmentRef>(false);
             BufferLookup<RouteWaypoint> routeWaypointLookup = SystemAPI.GetBufferLookup<RouteWaypoint>(true);
             CompleteDependency();
-
+            EntityCommandBuffer entityCommandBuffer = new EntityCommandBuffer(Allocator.Temp);
             NativeArray<Entity> entityyArray = entityQuery.ToEntityArray(Allocator.Temp);
             created = new NativeHashSet<Entity>(0, allocator);
             destroyed = new NativeHashSet<Entity>(0, allocator);
+            var createdIndexDictionary = new Dictionary<int, HashSet<int>>();
             for (int i = 0; i < entityyArray.Length; i++)
             {
                 Entity entity = entityyArray[i];
@@ -1610,7 +1612,7 @@ namespace GameBoardingController.Systems.Pathfind
                 {
                     if (!extraSegmentLookup.TryGetBuffer(entity, out var extraSegmentBuffer))
                     {
-                        extraSegmentBuffer = EntityManager.AddBuffer<ExtraSegmentRef>(entity);
+                        extraSegmentBuffer = entityCommandBuffer.AddBuffer<ExtraSegmentRef>(entity);
                     }
                     int leaderIndex = WaypointUtils.GetLeaderIndex(ref customWaypointLookup, routeWaypointBuffer, segment.m_Index, out int linkedCount);
                     int groupLastIndex = math.select((leaderIndex + linkedCount - 1) % routeWaypointBuffer.Length, segment.m_Index, linkedCount >= routeWaypointBuffer.Length);
@@ -1635,15 +1637,27 @@ namespace GameBoardingController.Systems.Pathfind
                         int extraIndex = j - 1;
                         if (extraIndex >= extraSegmentBuffer.Length)
                         {
-                            extraSegmentBuffer.Add(new ExtraSegmentRef { m_CustomSegment = EntityManager.CreateEntity() });
-                            created.Add(extraSegmentBuffer[extraIndex].m_CustomSegment);
+                            Entity extraSegmentEntity = entityCommandBuffer.CreateEntity();
+                            entityCommandBuffer.AddComponent<ExtraSegment>(extraSegmentEntity, new ExtraSegment());
+                            entityCommandBuffer.AppendToBuffer(entity, new ExtraSegmentRef { m_CustomSegment = extraSegmentEntity });
+                            createdIndexDictionary.TryAdd(i, new HashSet<int>());
+                            createdIndexDictionary[i].Add(extraIndex);
                         }
                     }
                     for (int j = nextLinkedCount - 1; j < extraSegmentBuffer.Length; j++)
                     {
                         destroyed.Add(extraSegmentBuffer[j].m_CustomSegment);
-                        EntityManager.DestroyEntity(extraSegmentBuffer[j].m_CustomSegment);
+                        entityCommandBuffer.DestroyEntity(extraSegmentBuffer[j].m_CustomSegment);
                     }
+                    extraSegmentBuffer.RemoveRange(nextLinkedCount - 1, extraSegmentBuffer.Length - (nextLinkedCount - 1));
+                }
+            }
+            entityCommandBuffer.Playback(EntityManager);
+            foreach (var kvp in createdIndexDictionary)
+            {
+                foreach (var index in kvp.Value)
+                {
+                    created.Add(extraSegmentLookup[entityyArray[kvp.Key]][index].m_CustomSegment);
                 }
             }
         }
