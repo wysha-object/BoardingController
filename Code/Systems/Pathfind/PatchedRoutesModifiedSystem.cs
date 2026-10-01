@@ -860,8 +860,6 @@ namespace GameBoardingController.Systems.Pathfind
             [ReadOnly]
             public BufferLookup<RouteWaypoint> m_Waypoints;
 
-            public BufferTypeHandle<ExtraSegmentRef> m_CustomSegmentRefType;
-
             [ReadOnly]
             public ComponentLookup<Connected> m_ConnectedLookup;
 
@@ -873,6 +871,8 @@ namespace GameBoardingController.Systems.Pathfind
 
             [ReadOnly]
             public BufferLookup<RouteSegment> m_RouteSegmentLookup;
+
+            public BufferLookup<ExtraSegmentRef> m_ExtraSegmentRefLookup;
 
             public NativeHashSet<Entity> m_CreatedExtraSegmentEntitySet;
 
@@ -892,7 +892,6 @@ namespace GameBoardingController.Systems.Pathfind
                     NativeArray<AccessLane> nativeArray3 = archetypeChunk.GetNativeArray(ref m_AccessLaneType);
                     NativeArray<RouteLane> nativeArray4 = archetypeChunk.GetNativeArray(ref m_RouteLaneType);
                     NativeArray<Game.Objects.SpawnLocation> nativeArray5 = archetypeChunk.GetNativeArray(ref m_SpawnLocationType);
-                    BufferAccessor<ExtraSegmentRef> extraSegmentAccessor = archetypeChunk.GetBufferAccessor(ref m_CustomSegmentRefType);
                     if (nativeArray3.Length != 0 || nativeArray4.Length != 0 || nativeArray5.Length != 0)
                     {
                         NativeArray<Waypoint> nativeArray6 = archetypeChunk.GetNativeArray(ref m_WaypointType);
@@ -1220,8 +1219,6 @@ namespace GameBoardingController.Systems.Pathfind
                         Game.Routes.Segment segment = nativeArray13[k];
                         DynamicBuffer<RouteWaypoint> routeWaypointBuffer = m_Waypoints[owner3.m_Owner];
                         DynamicBuffer<RouteSegment> routeSegmentBuffer = m_RouteSegmentLookup[owner3.m_Owner];
-                        DynamicBuffer<ExtraSegmentRef> extraSegmentBuffer;
-                        extraSegmentBuffer = extraSegmentAccessor[k];
                         int leaderIndex = WaypointUtils.GetLeaderIndex(ref m_CustomWaypointLookup, routeWaypointBuffer, segment.m_Index, out int linkedCount);
                         int groupLastIndex = math.select((leaderIndex + linkedCount - 1) % routeWaypointBuffer.Length, segment.m_Index, linkedCount >= routeWaypointBuffer.Length);
                         if (!m_RouteInfoLookup.TryGetComponent(routeSegmentBuffer[groupLastIndex].m_Segment, out var routeInfo))
@@ -1244,55 +1241,61 @@ namespace GameBoardingController.Systems.Pathfind
                                 out nextLinkedCount
                             );
                         }
-                        Entity waypoint = routeWaypointBuffer[segment.m_Index].m_Waypoint;
-                        Position position = m_PositionData[waypoint];
                         TransportLineData transportLineData2 = GetTransportLineData(owner3.m_Owner, out var _);
                         PathfindTransportData transportLinePathfindData2 = GetTransportLinePathfindData(transportLineData2);
-                        for (int j = 0; j < nextLinkedCount; j++)
+                        for (int startIndexOffset = 0; startIndexOffset < linkedCount; startIndexOffset++)
                         {
-                            int nextIndex = (nextLeaderIndex + j) % routeWaypointBuffer.Length;
-                            Entity owner;
-                            bool isNew = false;
-                            if (j == 0)
+                            int startIndex = (leaderIndex + startIndexOffset) % routeWaypointBuffer.Length;
+                            Entity waypointEntity = routeWaypointBuffer[startIndex].m_Waypoint;
+                            Entity segmentEntity = routeSegmentBuffer[startIndex].m_Segment;
+                            Position position = m_PositionData[waypointEntity];
+                            DynamicBuffer<ExtraSegmentRef> extraSegmentRefBuffer = m_ExtraSegmentRefLookup[segmentEntity];
+                            for (int endIndexOffset = 0; endIndexOffset < nextLinkedCount; endIndexOffset++)
                             {
-                                owner = owner2;
-                            }
-                            else
-                            {
-                                owner = extraSegmentBuffer[j - 1].m_CustomSegment;
-                                if (m_CreatedExtraSegmentEntitySet.Contains(owner))
+                                int endIndex = (nextLeaderIndex + endIndexOffset) % routeWaypointBuffer.Length;
+                                Entity owner;
+                                bool isNew = false;
+                                if (endIndexOffset == 0)
                                 {
-                                    isNew = true;
+                                    owner = owner2;
                                 }
-                            }
+                                else
+                                {
+                                    owner = extraSegmentRefBuffer[endIndexOffset - 1].m_CustomSegment;
+                                    if (m_CreatedExtraSegmentEntitySet.Contains(owner))
+                                    {
+                                        isNew = true;
+                                    }
+                                }
 
-                            Entity waypoint2 = routeWaypointBuffer[nextIndex].m_Waypoint;
-                            Position position2 = m_PositionData[waypoint2];
-                            if (isNew)
-                            {
-                                CreateActionData value3 = new CreateActionData
+                                Entity waypoint2 = routeWaypointBuffer[endIndex].m_Waypoint;
+                                Position position2 = m_PositionData[waypoint2];
+                                if (isNew)
                                 {
-                                    m_Owner = owner,
-                                    m_StartNode = new PathNode(waypoint, 0),
-                                    m_MiddleNode = new PathNode(owner, 0),
-                                    m_EndNode = new PathNode(waypoint2, 0),
-                                    m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
-                                    m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
-                                };
-                                m_CreateActionDataList.Add(value3);
-                            }
-                            else
-                            {
-                                UpdateActionData value2 = new UpdateActionData
+                                    CreateActionData value3 = new CreateActionData
+                                    {
+                                        m_Owner = owner,
+                                        m_StartNode = new PathNode(waypointEntity, 0),
+                                        m_MiddleNode = new PathNode(owner, 0),
+                                        m_EndNode = new PathNode(waypoint2, 0),
+                                        m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
+                                        m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
+                                    };
+                                    m_CreateActionDataList.Add(value3);
+                                }
+                                else
                                 {
-                                    m_Owner = owner,
-                                    m_StartNode = new PathNode(waypoint, 0),
-                                    m_MiddleNode = new PathNode(owner, 0),
-                                    m_EndNode = new PathNode(waypoint2, 0),
-                                    m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
-                                    m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
-                                };
-                                m_UpdateActionDataList.Add(value2);
+                                    UpdateActionData value2 = new UpdateActionData
+                                    {
+                                        m_Owner = owner,
+                                        m_StartNode = new PathNode(waypointEntity, 0),
+                                        m_MiddleNode = new PathNode(owner, 0),
+                                        m_EndNode = new PathNode(waypoint2, 0),
+                                        m_Specification = PathUtils.GetTransportLineSpecification(transportLineData2, transportLinePathfindData2, routeInfo),
+                                        m_Location = PathUtils.GetLocationSpecification(position.m_Position, position2.m_Position),
+                                    };
+                                    m_UpdateActionDataList.Add(value2);
+                                }
                             }
                         }
                     }
@@ -1595,6 +1598,7 @@ namespace GameBoardingController.Systems.Pathfind
             ComponentLookup<CustomWaypoint> customWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true);
             BufferLookup<ExtraSegmentRef> extraSegmentLookup = SystemAPI.GetBufferLookup<ExtraSegmentRef>(false);
             BufferLookup<RouteWaypoint> routeWaypointLookup = SystemAPI.GetBufferLookup<RouteWaypoint>(true);
+            BufferLookup<RouteSegment> routeSegmentLookup = SystemAPI.GetBufferLookup<RouteSegment>(true);
             CompleteDependency();
             EntityCommandBuffer entityCommandBuffer = new EntityCommandBuffer(Allocator.Temp);
             NativeArray<Entity> entityyArray = entityQuery.ToEntityArray(Allocator.Temp);
@@ -1608,6 +1612,7 @@ namespace GameBoardingController.Systems.Pathfind
                     ownerLookup.TryGetComponent(entity, out var owner)
                     && segmentLookup.TryGetComponent(entity, out var segment)
                     && routeWaypointLookup.TryGetBuffer(owner.m_Owner, out var routeWaypointBuffer)
+                    && routeSegmentLookup.TryGetBuffer(owner.m_Owner, out var routeSegmentBuffer)
                 )
                 {
                     if (!extraSegmentLookup.TryGetBuffer(entity, out var extraSegmentBuffer))
@@ -1632,6 +1637,11 @@ namespace GameBoardingController.Systems.Pathfind
                             out nextLinkedCount
                         );
                     }
+                    for (int j = 0; j < linkedCount; j++)
+                    {
+                        int index = (leaderIndex + j) & routeWaypointBuffer.Length;
+                        entityCommandBuffer.AddBuffer<ExtraSegmentRef>(routeSegmentBuffer[index].m_Segment);
+                    }
                     for (int j = 1; j < nextLinkedCount; j++)
                     {
                         int extraIndex = j - 1;
@@ -1653,6 +1663,7 @@ namespace GameBoardingController.Systems.Pathfind
                 }
             }
             entityCommandBuffer.Playback(EntityManager);
+            extraSegmentLookup = SystemAPI.GetBufferLookup<ExtraSegmentRef>(false);
             foreach (var kvp in createdIndexDictionary)
             {
                 foreach (var index in kvp.Value)
@@ -1933,11 +1944,11 @@ namespace GameBoardingController.Systems.Pathfind
                                 m_CarPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindCarData>(true),
                                 m_TrackPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindTrackData>(true),
                                 m_ConnectionPathfindData = SystemAPI.GetComponentLookup<Game.Prefabs.PathfindConnectionData>(true),
-                                m_CustomSegmentRefType = SystemAPI.GetBufferTypeHandle<ExtraSegmentRef>(false),
                                 m_ConnectedLookup = SystemAPI.GetComponentLookup<Connected>(true),
                                 m_CustomWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true),
                                 m_RouteInfoLookup = SystemAPI.GetComponentLookup<RouteInfo>(true),
                                 m_RouteSegmentLookup = SystemAPI.GetBufferLookup<RouteSegment>(true),
+                                m_ExtraSegmentRefLookup = SystemAPI.GetBufferLookup<ExtraSegmentRef>(false),
                                 m_CreatedExtraSegmentEntitySet = createdExtraSegmentEntities,
                                 m_CreateActionDataList = createActionDataList,
                                 m_UpdateActionDataList = updateActionDataList,
