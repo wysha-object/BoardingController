@@ -100,13 +100,17 @@ namespace BoardingController.Systems.UI
                         if (
                             EntityManager.TryGetComponent<Game.Routes.Waypoint>(entity, out var waypoint)
                             && EntityManager.TryGetComponent<Owner>(entity, out var owner)
+                            && EntityManager.TryGetBuffer<RouteWaypoint>(owner.m_Owner, true, out var routeWaypointBuffer)
                             && EntityManager.TryGetBuffer<RouteSegment>(owner.m_Owner, true, out var routeSegmentBuffer)
                         )
                         {
                             EntityManager.AddComponentData(m_SelectedInfoUISystem.selectedEntity, new Updated());
                             EntityManager.AddComponentData(owner.m_Owner, new Updated());
-                            EntityManager.AddComponentData(entity, new Updated());
-                            EntityManager.AddComponentData(routeSegmentBuffer[waypoint.m_Index].m_Segment, new Updated());
+                            for (int i = 0; i < routeWaypointBuffer.Length; i++)
+                            {
+                                EntityManager.AddComponentData(routeWaypointBuffer[i].m_Waypoint, new Updated());
+                                EntityManager.AddComponentData(routeSegmentBuffer[i].m_Segment, new Updated());
+                            }
                         }
                         return "";
                     }
