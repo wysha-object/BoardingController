@@ -18,6 +18,7 @@ Beta version of Boarding Controller ()
     <Thumbnail Value="Properties/BetaThumbnail.png" />
     
     <Screenshot Value="Properties/Screenshots/Screenshot1.jpg" />
+    <Screenshot Value="Properties/Screenshots/Screenshot2.jpg" />
     
     <Tag Value="" />
     

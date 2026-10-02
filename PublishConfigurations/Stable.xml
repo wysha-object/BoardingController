@@ -59,6 +59,7 @@ Wherever you report an issue, please make sure to describe it clearly.
 
     <!--Screenshot, can be set multiple times-->
     <Screenshot Value="Properties/Screenshots/Screenshot1.jpg" />
+    <Screenshot Value="Properties/Screenshots/Screenshot2.jpg" />
 
     <!--Tag, can be set multiple times-->
     <Tag Value="" />
