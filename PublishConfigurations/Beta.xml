@@ -9,7 +9,7 @@
 
 # Boarding Controller [Beta]
 
-Beta version of Boarding Controller ()
+Beta version of Boarding Controller (https://mods.paradoxplaza.com/mods/161673/Windows)
 
 # **IMPORTANT: DO NOT SWITCH BACK TO THE STABLE CHANNEL WHEN THE BETA VERSION IS AHEAD OF STABLE (THAT IS, THEY HAVE DIFFERENT COMMIT HASHES), AS THIS MAY CAUSE ISSUES.**
 
@@ -22,7 +22,7 @@ Beta version of Boarding Controller ()
     
     <Tag Value="" />
     
-    <ForumLink Value="" />
+    <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/boarding-controller-discussion-thread.1943719/" />
     
     <ModVersion Value="" />
     

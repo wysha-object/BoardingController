@@ -65,10 +65,10 @@ Wherever you report an issue, please make sure to describe it clearly.
     <Tag Value="" />
 
     <!--Link to the forum post where the mod can be discussed-->
-    <ForumLink Value="" />
+    <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/boarding-controller-discussion-thread.1943719/" />
 
     <!--Version of the mod-->
-    <ModVersion Value="" />
+    <ModVersion Value="161673" />
 
     <!--Recommended version of the base game to use the mod-->
     <GameVersion Value="1.*" />
