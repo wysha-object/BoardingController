@@ -1,0 +1,11 @@
+{
+    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "版本",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "发布频道",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "版本",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "用于更新的发布频道",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.Version]": "当前版本",
+    "Options.SECTION[BoardingController.BoardingController.Mod]": "停泊控制",
+    "Options.TAB[BoardingController.BoardingController.Mod.TabGeneral]": "通用",
+    "Options.WARNING[BoardingController.BoardingController.Mod.Settings.ResetBindings]": "这将把所有按键绑定重置为默认值. 确定要继续吗?",
+    "BoardingController.Waypoint.Linked": "链接到下一个航点"
+}

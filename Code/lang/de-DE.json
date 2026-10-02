@@ -1,0 +1,11 @@
+{
+    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "Version",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Release-Kanal",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Version",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Der Release-Kanal für Updates.",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Die aktuelle Version des Mod.",
+    "Options.SECTION[BoardingController.BoardingController.Mod]": "Boarding Controller",
+    "Options.TAB[BoardingController.BoardingController.Mod.TabGeneral]": "Allgemein",
+    "Options.WARNING[BoardingController.BoardingController.Mod.Settings.ResetBindings]": "Dies wird alle Tastenzuordnungen auf ihre Standardwerte zurücksetzen. Sind Sie sicher, dass Sie fortfahren möchten?",
+    "BoardingController.Waypoint.Linked": "mit dem nächsten Wegpunkt verlinken"
+}

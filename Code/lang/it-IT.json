@@ -1,0 +1,11 @@
+{
+    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "Versione",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Rilascia Canale",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Versione",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Il canale di rilascio da usare per gli aggiornamenti.",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.Version]": "La versione corrente della mod.",
+    "Options.SECTION[BoardingController.BoardingController.Mod]": "Controllore Di Imbarco",
+    "Options.TAB[BoardingController.BoardingController.Mod.TabGeneral]": "Generale",
+    "Options.WARNING[BoardingController.BoardingController.Mod.Settings.ResetBindings]": "Questo reimposterà tutte le associazioni di tasti ai loro valori predefiniti. Sei sicuro di voler continuare?",
+    "BoardingController.Waypoint.Linked": "collegamento con il prossimo waypoint"
+}

@@ -1,0 +1,11 @@
+{
+    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "バージョン",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "チャンネルをリリース",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "バージョン",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "アップデートに使用するリリースチャンネル。",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Modの現在のバージョン。",
+    "Options.SECTION[BoardingController.BoardingController.Mod]": "搭乗コントローラ",
+    "Options.TAB[BoardingController.BoardingController.Mod.TabGeneral]": "全般",
+    "Options.WARNING[BoardingController.BoardingController.Mod.Settings.ResetBindings]": "これはすべてのキー割り当てをデフォルト値にリセットします。続行してもよろしいですか？",
+    "BoardingController.Waypoint.Linked": "次のウェイポイントとのリンク"
+}
