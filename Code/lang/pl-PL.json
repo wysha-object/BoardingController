@@ -1,11 +1,11 @@
 {
-    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "Version",
-    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Release Channel",
-    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Version",
-    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "The release channel to use for updates.",
-    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.Version]": "The current version of the mod.",
-    "Options.SECTION[BoardingController.BoardingController.Mod]": "Boarding Controller",
-    "Options.TAB[BoardingController.BoardingController.Mod.TabGeneral]": "General",
-    "Options.WARNING[BoardingController.BoardingController.Mod.Settings.ResetBindings]": "This will reset all key bindings to their default values. Are you sure you want to continue?",
-    "BoardingController.Waypoint.Linked": "link with next waypoint"
+    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "Wersja",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Kanał Wydania",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Wersja",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Kanał wydania używany do aktualizacji.",
+    "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Aktualna wersja moda.",
+    "Options.SECTION[BoardingController.BoardingController.Mod]": "Kontroler pokładowy",
+    "Options.TAB[BoardingController.BoardingController.Mod.TabGeneral]": "Ogólny",
+    "Options.WARNING[BoardingController.BoardingController.Mod.Settings.ResetBindings]": "Spowoduje to zresetowanie wszystkich powiązań kluczy do ich wartości domyślnych. Czy na pewno chcesz kontynuować?",
+    "BoardingController.Waypoint.Linked": "link z następnym punktem trasy"
 }
