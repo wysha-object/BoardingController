@@ -1639,7 +1639,7 @@ namespace GameBoardingController.Systems.Pathfind
                     }
                     for (int j = 0; j < linkedCount; j++)
                     {
-                        int index = (leaderIndex + j) & routeWaypointBuffer.Length;
+                        int index = (leaderIndex + j) % routeWaypointBuffer.Length;
                         entityCommandBuffer.AddBuffer<ExtraSegmentRef>(routeSegmentBuffer[index].m_Segment);
                     }
                     for (int j = 1; j < nextLinkedCount; j++)
