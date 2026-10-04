@@ -23,6 +23,7 @@ QQ: 760057820
 ## Feature
 
 Controls vehicle boarding behavior
+
 - Link a waypoint to the next waypoint. Continuously linked waypoints form a waypoint group. A waypoint group is treated as a single large waypoint, and the vehicle will select only one waypoint within the group for boarding.
 
 ## Support
