@@ -7,5 +7,5 @@
     "Options.SECTION[BoardingController.BoardingController.Mod]": "停泊控制器",
     "Options.TAB[BoardingController.BoardingController.Mod.TabGeneral]": "通用",
     "Options.WARNING[BoardingController.BoardingController.Mod.Settings.ResetBindings]": "这将把所有按键绑定重置为默认值. 确定要继续吗?",
-    "BoardingController.Waypoint.Linked": "链接到下一个航点"
+    "BoardingController.Waypoint.Linked": "链接到下一个路径点"
 }
