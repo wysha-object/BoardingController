@@ -1640,7 +1640,10 @@ namespace GameBoardingController.Systems.Pathfind
                     for (int j = 0; j < linkedCount; j++)
                     {
                         int index = (leaderIndex + j) % routeWaypointBuffer.Length;
-                        entityCommandBuffer.AddBuffer<ExtraSegmentRef>(routeSegmentBuffer[index].m_Segment);
+                        if (!extraSegmentLookup.HasBuffer(routeSegmentBuffer[index].m_Segment))
+                        {
+                            entityCommandBuffer.AddBuffer<ExtraSegmentRef>(routeSegmentBuffer[index].m_Segment);
+                        }
                     }
                     for (int j = 1; j < nextLinkedCount; j++)
                     {
@@ -1659,7 +1662,11 @@ namespace GameBoardingController.Systems.Pathfind
                         destroyed.Add(extraSegmentBuffer[j].m_CustomSegment);
                         entityCommandBuffer.DestroyEntity(extraSegmentBuffer[j].m_CustomSegment);
                     }
-                    extraSegmentBuffer.RemoveRange(nextLinkedCount - 1, extraSegmentBuffer.Length - (nextLinkedCount - 1));
+                    int needRemoveCount = extraSegmentBuffer.Length - (nextLinkedCount - 1);
+                    if (needRemoveCount > 0)
+                    {
+                        extraSegmentBuffer.RemoveRange(nextLinkedCount - 1, needRemoveCount);
+                    }
                 }
             }
             entityCommandBuffer.Playback(EntityManager);

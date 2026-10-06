@@ -336,6 +336,7 @@ namespace BoardingController.Systems.Routes
                 ComponentTypeHandle<Temp> typeHandle4 = SystemAPI.GetComponentTypeHandle<Temp>(true);
                 ComponentTypeHandle<PrefabRef> typeHandle5 = SystemAPI.GetComponentTypeHandle<PrefabRef>(true);
                 ComponentLookup<Owner> ownerLookup = SystemAPI.GetComponentLookup<Owner>(true);
+                ComponentLookup<Game.Routes.Segment> segmentLookup = SystemAPI.GetComponentLookup<Game.Routes.Segment>(true);
                 ComponentLookup<CustomWaypoint> customWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true);
                 BufferLookup<RouteWaypoint> routeWaypointLookup = SystemAPI.GetBufferLookup<RouteWaypoint>(true);
                 CompleteDependency();
@@ -365,8 +366,9 @@ namespace BoardingController.Systems.Routes
                                 || (
                                     tempArray.Length > 0
                                     && ownerLookup.TryGetComponent(tempArray[j].m_Original, out var originalOwner)
+                                    && segmentLookup.TryGetComponent(tempArray[j].m_Original, out var originalSegment)
                                     && routeWaypointLookup.TryGetBuffer(originalOwner.m_Owner, out var originalRouteWaypointBuffer)
-                                    && customWaypointLookup.TryGetComponent(originalRouteWaypointBuffer[segment.m_Index].m_Waypoint, out customWaypoint)
+                                    && customWaypointLookup.TryGetComponent(originalRouteWaypointBuffer[originalSegment.m_Index].m_Waypoint, out customWaypoint)
                                 )
                             )
                         )
