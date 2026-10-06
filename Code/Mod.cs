@@ -50,13 +50,22 @@ namespace BoardingController
             updateSystem.World.GetOrCreateSystemManaged<RoutesModifiedSystem>().Enabled = false;
             updateSystem.World.GetOrCreateSystemManaged<RoutePathSystem>().Enabled = false;
             updateSystem.World.GetOrCreateSystemManaged<TransportCarAISystem>().Enabled = false;
+            updateSystem.World.GetExistingSystemManaged<TransportTrainAISystem>().Enabled = false;
+            updateSystem.World.GetExistingSystemManaged<TransportWatercraftAISystem>().Enabled = false;
+            updateSystem.World.GetOrCreateSystemManaged<TransportAircraftAISystem>().Enabled = false;
             updateSystem.World.GetOrCreateSystemManaged<ResidentAISystem>().Enabled = false;
 
             updateSystem.UpdateAt<PatchedRoutesModifiedSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<PatchedRoutePathSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<PatchedTransportCarAISystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<PatchedTransportTrainAISystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<PatchedTransportWatercraftAISystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<PatchedTransportAircraftAISystem>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateBefore<PatchedResidentAISystem, ResidentAISystem.Actions>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAt<PatchedTransportCarAISystem>(SystemUpdatePhase.LoadSimulation);
+            updateSystem.UpdateAt<PatchedTransportTrainAISystem>(SystemUpdatePhase.LoadSimulation);
+            updateSystem.UpdateAt<PatchedTransportWatercraftAISystem>(SystemUpdatePhase.LoadSimulation);
+            updateSystem.UpdateAt<PatchedTransportAircraftAISystem>(SystemUpdatePhase.LoadSimulation);
             updateSystem.UpdateAt<Systems.UI.UISystem>(SystemUpdatePhase.UIUpdate);
         }
 

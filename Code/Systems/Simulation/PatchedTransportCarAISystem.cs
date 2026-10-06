@@ -2006,7 +2006,5 @@ namespace BoardingController.Systems.Simulation
             m_EndFrameBarrier.AddJobHandleForProducer(jobHandle);
             base.Dependency = jobHandle2;
         }
-
-        public PatchedTransportCarAISystem() { }
     }
 }

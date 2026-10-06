@@ -30,7 +30,7 @@ namespace BoardingController.Systems.UI
                             EntityManager.TryGetBuffer(inputValue.line, true, out DynamicBuffer<RouteWaypoint> routeWaypointBuffer)
                             && EntityManager.TryGetComponent<PrefabRef>(inputValue.line, out var prefabRef)
                             && EntityManager.TryGetComponent<TransportLineData>(prefabRef.m_Prefab, out var transportLineData)
-                            && new[] { TransportType.Bus }.Contains(transportLineData.m_TransportType)
+                        //&& new[] { TransportType.Bus }.Contains(transportLineData.m_TransportType)
                         )
                         {
                             for (int i = 0; i < routeWaypointBuffer.Length; i++)
