@@ -9,7 +9,6 @@ using Colossal.UI.Binding;
 using Game.Common;
 using Game.Prefabs;
 using Game.Routes;
-using Newtonsoft.Json;
 using Unity.Entities;
 
 namespace BoardingController.Systems.UI
@@ -19,16 +18,16 @@ namespace BoardingController.Systems.UI
         private void AddUIBindings()
         {
             AddBinding(
-                new CallBinding<string, string>(
+                new CallBinding<UITypes.GetWaypointsInput, UITypes.Waypoint[]>(
                     "BoardingController",
                     "GetWaypoints",
-                    (inputJsonString) =>
+                    (inputValue) =>
                     {
-                        var inputValue = JsonConvert.DeserializeAnonymousType(inputJsonString, new { line = Entity.Null });
+                        var line = new Entity { Index = inputValue.line.index, Version = inputValue.line.version };
                         var rs = new List<UITypes.Waypoint>();
                         if (
-                            EntityManager.TryGetBuffer(inputValue.line, true, out DynamicBuffer<RouteWaypoint> routeWaypointBuffer)
-                            && EntityManager.TryGetComponent<PrefabRef>(inputValue.line, out var prefabRef)
+                            EntityManager.TryGetBuffer(line, true, out DynamicBuffer<RouteWaypoint> routeWaypointBuffer)
+                            && EntityManager.TryGetComponent<PrefabRef>(line, out var prefabRef)
                             && EntityManager.TryGetComponent<TransportLineData>(prefabRef.m_Prefab, out var transportLineData)
                         //&& new[] { TransportType.Bus }.Contains(transportLineData.m_TransportType)
                         )
@@ -75,17 +74,16 @@ namespace BoardingController.Systems.UI
                                 }
                             }
                         }
-                        return JsonConvert.SerializeObject(rs);
+                        return rs.ToArray();
                     }
                 )
             );
             AddBinding(
-                new CallBinding<string, string>(
+                new CallBinding<UITypes.Waypoint, int>(
                     "BoardingController",
                     "SetWaypoint",
-                    (inputJsonString) =>
+                    (inputValue) =>
                     {
-                        var inputValue = JsonConvert.DeserializeAnonymousType(inputJsonString, new UITypes.Waypoint());
                         var entity = new Entity { Index = inputValue.entity.index, Version = inputValue.entity.version };
                         if (!EntityManager.TryGetComponent(entity, out CustomWaypoint customWaypoint))
                         {
@@ -117,7 +115,7 @@ namespace BoardingController.Systems.UI
                                 EntityManager.AddComponentData(routeSegmentBuffer[i].m_Segment, new Updated());
                             }
                         }
-                        return "";
+                        return 0;
                     }
                 )
             );
