@@ -1,5 +1,10 @@
-import { Entity } from "cs2/utils";
+import { Entity } from 'cs2/utils'
+
 export interface Waypoint {
-    entity: Entity
-    isLinked: boolean
+  entity: Entity
+  isLinked: boolean
+}
+
+export interface GetWaypointsInput {
+  line: Entity
 }

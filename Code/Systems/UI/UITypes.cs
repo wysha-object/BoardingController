@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Colossal.UI.Binding;
-using Unity.Entities;
+﻿using Colossal.UI.Binding;
 
 namespace BoardingController.Systems.UI
 {
@@ -36,19 +30,6 @@ namespace BoardingController.Systems.UI
             }
         }
 
-        public struct GetWaypointsInput : IJsonReadable
-        {
-            public Entity line;
-
-            public void Read(IJsonReader reader)
-            {
-                reader.ReadMapBegin();
-                reader.ReadProperty(nameof(line));
-                line.Read(reader);
-                reader.ReadMapEnd();
-            }
-        }
-
         public struct Waypoint : IJsonReadable, IJsonWritable
         {
             public Entity entity;
@@ -72,6 +53,19 @@ namespace BoardingController.Systems.UI
                 writer.PropertyName(nameof(isLinked));
                 writer.Write(isLinked);
                 writer.TypeEnd();
+            }
+        }
+
+        public struct GetWaypointsInput : IJsonReadable
+        {
+            public Entity line;
+
+            public void Read(IJsonReader reader)
+            {
+                reader.ReadMapBegin();
+                reader.ReadProperty(nameof(line));
+                line.Read(reader);
+                reader.ReadMapEnd();
             }
         }
     }

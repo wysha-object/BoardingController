@@ -1,8 +1,9 @@
 import { call } from 'cs2/api'
-import { Entity } from 'cs2/utils'
-import { Waypoint } from 'types'
+import { GetWaypointsInput, Waypoint } from 'types'
 
-export async function getWaypointCmd(inputValue: { line: Entity}): Promise<Waypoint[]> {
+export async function getWaypointCmd(
+  inputValue: GetWaypointsInput,
+): Promise<Waypoint[]> {
   return await call('BoardingController', 'GetWaypoints', inputValue)
 }
 export async function setWaypointCmd(inputValue: Waypoint): Promise<void> {
