@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Threading;
+﻿using System.Threading;
 using BoardingController.Components;
 using BoardingController.Utils;
 using Colossal.Collections;
@@ -416,6 +415,9 @@ namespace BoardingController.Systems.Simulation
 
             [ReadOnly]
             public BufferLookup<RouteWaypoint> m_RouteWaypointLookup;
+
+            [ReadOnly]
+            public BufferLookup<ExtraBoardingVehicle> m_ExtraBoardingVehicleLookup;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -2115,7 +2117,8 @@ namespace BoardingController.Systems.Simulation
                                 out var obsolete,
                                 ref m_WaypointLookup,
                                 ref m_CustomWaypointLookup,
-                                ref m_RouteWaypointLookup
+                                ref m_RouteWaypointLookup,
+                                ref m_ExtraBoardingVehicleLookup
                             )
                         )
                         {
@@ -2178,7 +2181,8 @@ namespace BoardingController.Systems.Simulation
                                 out var _,
                                 ref m_WaypointLookup,
                                 ref m_CustomWaypointLookup,
-                                ref m_RouteWaypointLookup
+                                ref m_RouteWaypointLookup,
+                                ref m_ExtraBoardingVehicleLookup
                             )
                         )
                         {
@@ -3225,7 +3229,7 @@ namespace BoardingController.Systems.Simulation
                     }
                     uint minDeparture = math.select(0u, m_SimulationFrameIndex, (resident.m_Flags & ResidentFlags.NoLateDeparture) != 0);
                     if (
-                        RouteUtils.GetBoardingVehicle(
+                        PatchedRouteUtils.GetBoardingVehicle(
                             currentLane.m_Lane,
                             target2,
                             target3,
@@ -3240,6 +3244,7 @@ namespace BoardingController.Systems.Simulation
                             ref m_TaxiData,
                             ref m_ConnectedRoutes,
                             ref m_RouteWaypointLookup,
+                            ref m_ExtraBoardingVehicleLookup,
                             out var vehicle,
                             out var testing,
                             out var obsolete
@@ -4042,6 +4047,7 @@ namespace BoardingController.Systems.Simulation
                 m_CustomWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(true),
                 m_WaypointLookup = SystemAPI.GetComponentLookup<Waypoint>(true),
                 m_RouteWaypointLookup = SystemAPI.GetBufferLookup<RouteWaypoint>(true),
+                m_ExtraBoardingVehicleLookup = SystemAPI.GetBufferLookup<ExtraBoardingVehicle>(true),
             };
             JobHandle dependsOn = JobChunkExtensions.ScheduleParallel(jobData, m_CreatureQuery, JobHandle.CombineDependencies(Dependency, jobHandle));
             jobData.m_GroupMember = true;

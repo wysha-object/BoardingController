@@ -1,1 +1,1 @@
-- optimize performance
+- Allow multiple road transport vehicles to board simultaneously at the same stop.

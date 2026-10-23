@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using BoardingController.Components;
 using BoardingController.Utils;
 using Colossal.Mathematics;
@@ -222,12 +221,22 @@ namespace BoardingController.Systems.Simulation
 
             public NativeQueue<SetupQueueItem>.ParallelWriter m_PathfindQueue;
 
-            public TransportBoardingHelpers.BoardingData.Concurrent m_BoardingData;
+            public PatchedTransportBoardingHelpers.BoardingData.Concurrent m_BoardingData;
+
+            [ReadOnly]
+            public ComponentTypeHandle<Moving> m_MovingType;
+
+            public ComponentTypeHandle<CustomVehicle> m_CustomVehicleType;
+
+            public BufferTypeHandle<PathElement> m_PathElementType;
 
             [ReadOnly]
             public ComponentLookup<Connected> m_ConnectedLookup;
 
             public ComponentLookup<CustomWaypoint> m_CustomWaypointLookup;
+
+            [ReadOnly]
+            public BufferLookup<ExtraBoardingVehicle> m_ExtraBoardingVehicleLookup;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -246,6 +255,9 @@ namespace BoardingController.Systems.Simulation
                 BufferAccessor<CarNavigationLane> bufferAccessor = chunk.GetBufferAccessor(ref m_CarNavigationLaneType);
                 BufferAccessor<Passenger> bufferAccessor2 = chunk.GetBufferAccessor(ref m_PassengerType);
                 BufferAccessor<ServiceDispatch> bufferAccessor3 = chunk.GetBufferAccessor(ref m_ServiceDispatchType);
+                NativeArray<Moving> movingArray = chunk.GetNativeArray(ref m_MovingType);
+                NativeArray<CustomVehicle> customVehicleArray = chunk.GetNativeArray(ref m_CustomVehicleType);
+                BufferAccessor<PathElement> PathElementAccessor = chunk.GetBufferAccessor(ref m_PathElementType);
                 bool isUnspawned = chunk.Has(ref m_UnspawnedType);
                 Unity.Mathematics.Random random = m_RandomSeed.GetRandom(unfilteredChunkIndex);
                 for (int i = 0; i < nativeArray.Length; i++)
@@ -261,6 +273,9 @@ namespace BoardingController.Systems.Simulation
                     Odometer odometer = nativeArray12[i];
                     DynamicBuffer<CarNavigationLane> navigationLanes = bufferAccessor[i];
                     DynamicBuffer<ServiceDispatch> serviceDispatches = bufferAccessor3[i];
+                    Moving moving = movingArray[i];
+                    CustomVehicle? customVehicleValue = customVehicleArray.Length > 0 ? customVehicleArray[i] : null;
+                    DynamicBuffer<PathElement> pathElementBuffer = PathElementAccessor[i];
                     CurrentRoute currentRoute = default(CurrentRoute);
                     if (nativeArray5.Length != 0)
                     {
@@ -296,8 +311,15 @@ namespace BoardingController.Systems.Simulation
                         ref currentLane,
                         ref pathOwner,
                         ref target,
-                        ref odometer
+                        ref odometer,
+                        moving,
+                        ref customVehicleValue,
+                        pathElementBuffer
                     );
+                    if (customVehicleArray.Length > 0 && customVehicleValue is CustomVehicle customVehicle)
+                    {
+                        customVehicleArray[i] = customVehicle;
+                    }
                     nativeArray9[i] = car;
                     nativeArray6[i] = currentLane;
                     nativeArray11[i] = pathOwner;
@@ -331,10 +353,13 @@ namespace BoardingController.Systems.Simulation
                 ref CarCurrentLane currentLane,
                 ref PathOwner pathOwner,
                 ref Target target,
-                ref Odometer odometer
+                ref Odometer odometer,
+                Moving moving,
+                ref CustomVehicle? customVehicleValue,
+                DynamicBuffer<PathElement> pathElementBuffer
             )
             {
-                bool flag = m_PublicTransportVehicleData.TryGetComponent(prefabRef.m_Prefab, out var componentData);
+                bool isPublicTransport = m_PublicTransportVehicleData.TryGetComponent(prefabRef.m_Prefab, out var componentData);
                 bool flag2 = m_CargoTransportVehicleData.TryGetComponent(prefabRef.m_Prefab, out var componentData2);
                 if (VehicleUtils.ResetUpdatedPath(ref pathOwner))
                 {
@@ -349,7 +374,7 @@ namespace BoardingController.Systems.Simulation
                         ref car,
                         ref currentLane,
                         ref pathOwner,
-                        flag
+                        isPublicTransport
                     );
                     if (
                         ((publicTransport.m_State & PublicTransportFlags.DummyTraffic) != 0 || (cargoTransport.m_State & CargoTransportFlags.DummyTraffic) != 0)
@@ -361,7 +386,7 @@ namespace BoardingController.Systems.Simulation
                 }
                 bool flag3 = (cargoTransport.m_State & CargoTransportFlags.EnRoute) == 0 && (publicTransport.m_State & PublicTransportFlags.EnRoute) == 0;
                 bool flag4 = false;
-                if (flag)
+                if (isPublicTransport)
                 {
                     if ((publicTransport.m_State & (PublicTransportFlags.Evacuating | PublicTransportFlags.PrisonerTransport)) != 0)
                     {
@@ -419,7 +444,7 @@ namespace BoardingController.Systems.Simulation
                     if ((cargoTransport.m_State & CargoTransportFlags.Boarding) != 0 || (publicTransport.m_State & PublicTransportFlags.Boarding) != 0)
                     {
                         flag5 = true;
-                        StopBoarding(vehicleEntity, currentRoute, passengers, ref cargoTransport, ref publicTransport, ref target, ref odometer, forcedStop: true);
+                        StopBoarding(jobIndex, vehicleEntity, currentRoute, passengers, ref cargoTransport, ref publicTransport, ref target, ref odometer, forcedStop: true);
                     }
                     if (
                         VehicleUtils.IsStuck(pathOwner)
@@ -441,7 +466,19 @@ namespace BoardingController.Systems.Simulation
                     {
                         if ((cargoTransport.m_State & CargoTransportFlags.Boarding) != 0 || (publicTransport.m_State & PublicTransportFlags.Boarding) != 0)
                         {
-                            if (StopBoarding(vehicleEntity, currentRoute, passengers, ref cargoTransport, ref publicTransport, ref target, ref odometer, forcedStop: false))
+                            if (
+                                StopBoarding(
+                                    jobIndex,
+                                    vehicleEntity,
+                                    currentRoute,
+                                    passengers,
+                                    ref cargoTransport,
+                                    ref publicTransport,
+                                    ref target,
+                                    ref odometer,
+                                    forcedStop: false
+                                )
+                            )
                             {
                                 flag5 = true;
                                 if (
@@ -457,7 +494,7 @@ namespace BoardingController.Systems.Simulation
                                         ref currentLane,
                                         ref pathOwner,
                                         ref target,
-                                        flag
+                                        isPublicTransport
                                     )
                                 )
                                 {
@@ -491,7 +528,7 @@ namespace BoardingController.Systems.Simulation
                                 ref currentLane,
                                 ref pathOwner,
                                 ref target,
-                                flag
+                                isPublicTransport
                             )
                         )
                         {
@@ -508,7 +545,7 @@ namespace BoardingController.Systems.Simulation
                     }
                     else if ((cargoTransport.m_State & CargoTransportFlags.Boarding) != 0 || (publicTransport.m_State & PublicTransportFlags.Boarding) != 0)
                     {
-                        if (StopBoarding(vehicleEntity, currentRoute, passengers, ref cargoTransport, ref publicTransport, ref target, ref odometer, forcedStop: false))
+                        if (StopBoarding(jobIndex, vehicleEntity, currentRoute, passengers, ref cargoTransport, ref publicTransport, ref target, ref odometer, forcedStop: false))
                         {
                             flag5 = true;
                             if ((publicTransport.m_State & (PublicTransportFlags.Evacuating | PublicTransportFlags.PrisonerTransport)) != 0)
@@ -526,7 +563,7 @@ namespace BoardingController.Systems.Simulation
                                         ref currentLane,
                                         ref pathOwner,
                                         ref target,
-                                        flag
+                                        isPublicTransport
                                     )
                                 )
                                 {
@@ -589,7 +626,7 @@ namespace BoardingController.Systems.Simulation
                                     ref currentLane,
                                     ref pathOwner,
                                     ref target,
-                                    flag
+                                    isPublicTransport
                                 )
                             )
                             {
@@ -628,10 +665,95 @@ namespace BoardingController.Systems.Simulation
                         }
                     }
                 }
+                else if (
+                    isPublicTransport
+                    && (
+                        publicTransport.m_State
+                        & (PublicTransportFlags.Returning | PublicTransportFlags.DummyTraffic | PublicTransportFlags.Evacuating | PublicTransportFlags.PrisonerTransport)
+                    ) == 0
+                    && BoardingUtils.BoardingSpaceReached(pathOwner, currentLane, pathElementBuffer, navigationLanes, ref m_CurveData)
+                )
+                {
+                    if ((publicTransport.m_State & PublicTransportFlags.Boarding) != 0)
+                    {
+                        if (StopBoarding(jobIndex, vehicleEntity, currentRoute, passengers, ref cargoTransport, ref publicTransport, ref target, ref odometer, forcedStop: false))
+                        {
+                            flag5 = true;
+                            if ((publicTransport.m_State & PublicTransportFlags.EnRoute) == 0)
+                            {
+                                ReturnToDepot(
+                                    jobIndex,
+                                    vehicleEntity,
+                                    currentRoute,
+                                    owner,
+                                    serviceDispatches,
+                                    ref cargoTransport,
+                                    ref publicTransport,
+                                    ref car,
+                                    ref pathOwner,
+                                    ref target
+                                );
+                            }
+                            else
+                            {
+                                SetNextWaypointTarget(currentRoute, ref pathOwner, ref target);
+                            }
+                        }
+                    }
+                    else if (!m_RouteWaypoints.HasBuffer(currentRoute.m_Route) || !m_WaypointData.HasComponent(target.m_Target))
+                    {
+                        ReturnToDepot(jobIndex, vehicleEntity, currentRoute, owner, serviceDispatches, ref cargoTransport, ref publicTransport, ref car, ref pathOwner, ref target);
+                    }
+                    else if (
+                        math.length(moving.m_Velocity) < 0.01f
+                        && m_ConnectedLookup.TryGetComponent(target.m_Target, out Connected connected)
+                        && m_BoardingVehicleData.TryGetComponent(connected.m_Connected, out BoardingVehicle boardingVehicle)
+                        && boardingVehicle.m_Vehicle != Entity.Null
+                        && boardingVehicle.m_Vehicle != vehicleEntity
+                    )
+                    {
+                        if (customVehicleValue is CustomVehicle customVehicle)
+                        {
+                            customVehicle.m_LowSpeedTime++;
+                            if (customVehicle.m_LowSpeedTime >= 1)
+                            {
+                                customVehicle.m_LowSpeedTime = 0;
+                                if (StartBoarding(jobIndex, vehicleEntity, currentRoute, prefabRef, ref cargoTransport, ref publicTransport, ref target, flag2))
+                                {
+                                    BoardingUtils.FinishPathfinding(pathElementBuffer, navigationLanes);
+                                }
+                                else if ((publicTransport.m_State & PublicTransportFlags.EnRoute) == 0)
+                                {
+                                    ReturnToDepot(
+                                        jobIndex,
+                                        vehicleEntity,
+                                        currentRoute,
+                                        owner,
+                                        serviceDispatches,
+                                        ref cargoTransport,
+                                        ref publicTransport,
+                                        ref car,
+                                        ref pathOwner,
+                                        ref target
+                                    );
+                                }
+                                else
+                                {
+                                    SetNextWaypointTarget(currentRoute, ref pathOwner, ref target);
+                                }
+                            }
+                            customVehicleValue = customVehicle;
+                        }
+                        else
+                        {
+                            m_CommandBuffer.AddComponent(jobIndex, vehicleEntity, new CustomVehicle() { m_LowSpeedTime = 0 });
+                        }
+                    }
+                }
                 else if ((cargoTransport.m_State & CargoTransportFlags.Boarding) != 0 || (publicTransport.m_State & PublicTransportFlags.Boarding) != 0)
                 {
                     flag5 = true;
-                    StopBoarding(vehicleEntity, currentRoute, passengers, ref cargoTransport, ref publicTransport, ref target, ref odometer, forcedStop: true);
+                    StopBoarding(jobIndex, vehicleEntity, currentRoute, passengers, ref cargoTransport, ref publicTransport, ref target, ref odometer, forcedStop: true);
                 }
                 publicTransport.m_State &= ~(PublicTransportFlags.StopLeft | PublicTransportFlags.StopRight);
                 Entity skipWaypoint = Entity.Null;
@@ -658,7 +780,7 @@ namespace BoardingController.Systems.Simulation
                             ref currentLane,
                             ref pathOwner,
                             ref target,
-                            flag
+                            isPublicTransport
                         );
                     }
                 }
@@ -1659,6 +1781,7 @@ namespace BoardingController.Systems.Simulation
             }
 
             private bool StopBoarding(
+                int jobIndex,
                 Entity vehicleEntity,
                 CurrentRoute currentRoute,
                 DynamicBuffer<Passenger> passengers,
@@ -1669,6 +1792,7 @@ namespace BoardingController.Systems.Simulation
                 bool forcedStop
             )
             {
+                m_CommandBuffer.RemoveComponent<CustomVehicle>(jobIndex, vehicleEntity);
                 bool flag = false;
                 if (
                     m_ConnectedLookup.TryGetComponent(target.m_Target, out var componentData)
@@ -1676,6 +1800,17 @@ namespace BoardingController.Systems.Simulation
                 )
                 {
                     flag = componentData2.m_Vehicle == vehicleEntity;
+                    if (!flag && m_ExtraBoardingVehicleLookup.TryGetBuffer(componentData.m_Connected, out var extraBoardingVehicles))
+                    {
+                        foreach (var extraBoardingVehicle in extraBoardingVehicles)
+                        {
+                            if (extraBoardingVehicle.m_Vehicle == vehicleEntity)
+                            {
+                                flag = true;
+                                break;
+                            }
+                        }
+                    }
                 }
                 if (!forcedStop)
                 {
@@ -1818,6 +1953,8 @@ namespace BoardingController.Systems.Simulation
 
         private EntityQuery m_VehicleQuery;
 
+        private EntityQuery m_MissingExtraBoardingVehicleQuery;
+
         private EntityArchetype m_TransportVehicleRequestArchetype;
 
         private EntityArchetype m_EvacuationRequestArchetype;
@@ -1830,7 +1967,7 @@ namespace BoardingController.Systems.Simulation
 
         private ComponentTypeSet m_MovingToParkedAddTypes;
 
-        private TransportBoardingHelpers.BoardingLookupData m_BoardingLookupData;
+        private PatchedTransportBoardingHelpers.BoardingLookupData m_BoardingLookupData;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
@@ -1851,7 +1988,11 @@ namespace BoardingController.Systems.Simulation
             m_CityStatisticsSystem = base.World.GetOrCreateSystemManaged<CityStatisticsSystem>();
             m_TransportUsageTrackSystem = base.World.GetOrCreateSystemManaged<TransportUsageTrackSystem>();
             m_AchievementTriggerSystem = base.World.GetOrCreateSystemManaged<AchievementTriggerSystem>();
-            m_BoardingLookupData = new TransportBoardingHelpers.BoardingLookupData(this);
+            m_BoardingLookupData = new PatchedTransportBoardingHelpers.BoardingLookupData(this);
+            m_MissingExtraBoardingVehicleQuery = GetEntityQuery(
+                ComponentType.ReadOnly<BoardingVehicle>(),
+                ComponentType.Exclude<ExtraBoardingVehicle>()
+            );
             m_VehicleQuery = GetEntityQuery(
                 new EntityQueryDesc
                 {
@@ -1913,7 +2054,12 @@ namespace BoardingController.Systems.Simulation
 
         protected override void OnUpdate()
         {
-            TransportBoardingHelpers.BoardingData boardingData = new TransportBoardingHelpers.BoardingData(Allocator.TempJob);
+            if (!m_MissingExtraBoardingVehicleQuery.IsEmptyIgnoreFilter)
+            {
+                CompleteDependency();
+                EntityManager.AddComponent(m_MissingExtraBoardingVehicleQuery, ComponentType.ReadWrite<ExtraBoardingVehicle>());
+            }
+            PatchedTransportBoardingHelpers.BoardingData boardingData = new PatchedTransportBoardingHelpers.BoardingData(Allocator.TempJob);
             m_BoardingLookupData.Update(this);
             JobHandle jobHandle = JobChunkExtensions.ScheduleParallel(
                 new TransportCarTickJob
@@ -1986,8 +2132,12 @@ namespace BoardingController.Systems.Simulation
                     m_CommandBuffer = m_EndFrameBarrier.CreateCommandBuffer().AsParallelWriter(),
                     m_PathfindQueue = m_PathfindSetupSystem.GetQueue(this, 64).AsParallelWriter(),
                     m_BoardingData = boardingData.ToConcurrent(),
+                    m_MovingType = SystemAPI.GetComponentTypeHandle<Moving>(true),
+                    m_CustomVehicleType = SystemAPI.GetComponentTypeHandle<CustomVehicle>(false),
+                    m_PathElementType = SystemAPI.GetBufferTypeHandle<Game.Pathfind.PathElement>(false),
                     m_ConnectedLookup = SystemAPI.GetComponentLookup<Game.Routes.Connected>(true),
                     m_CustomWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(false),
+                    m_ExtraBoardingVehicleLookup = SystemAPI.GetBufferLookup<ExtraBoardingVehicle>(true),
                 },
                 m_VehicleQuery,
                 base.Dependency
@@ -2003,7 +2153,7 @@ namespace BoardingController.Systems.Simulation
             );
             boardingData.Dispose(jobHandle2);
             m_PathfindSetupSystem.AddQueueWriter(jobHandle);
-            m_EndFrameBarrier.AddJobHandleForProducer(jobHandle);
+            m_EndFrameBarrier.AddJobHandleForProducer(jobHandle2);
             base.Dependency = jobHandle2;
         }
     }
