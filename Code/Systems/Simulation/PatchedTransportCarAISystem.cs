@@ -2053,8 +2053,7 @@ namespace BoardingController.Systems.Simulation
         {
             if (!m_MissingExtraBoardingVehicleQuery.IsEmptyIgnoreFilter)
             {
-                CompleteDependency();
-                EntityManager.AddComponent(m_MissingExtraBoardingVehicleQuery, ComponentType.ReadWrite<ExtraBoardingVehicle>());
+                EntityManager.AddComponent<ExtraBoardingVehicle>(m_MissingExtraBoardingVehicleQuery);
             }
             PatchedTransportBoardingHelpers.BoardingData boardingData = new PatchedTransportBoardingHelpers.BoardingData(Allocator.TempJob);
             m_BoardingLookupData.Update(this);
