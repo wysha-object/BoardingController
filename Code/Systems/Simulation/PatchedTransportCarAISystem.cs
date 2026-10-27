@@ -2134,7 +2134,7 @@ namespace BoardingController.Systems.Simulation
                     m_PathElementType = SystemAPI.GetBufferTypeHandle<Game.Pathfind.PathElement>(false),
                     m_ConnectedLookup = SystemAPI.GetComponentLookup<Game.Routes.Connected>(true),
                     m_CustomWaypointLookup = SystemAPI.GetComponentLookup<CustomWaypoint>(false),
-                    m_PedestrianLaneLookup = SystemAPI.GetComponentLookup<Game.Net.PedestrianLane>(false),
+                    m_PedestrianLaneLookup = SystemAPI.GetComponentLookup<Game.Net.PedestrianLane>(true),
                     m_ExtraBoardingVehicleLookup = SystemAPI.GetBufferLookup<ExtraBoardingVehicle>(true),
                 },
                 m_VehicleQuery,
