@@ -17,15 +17,42 @@ namespace BoardingController.Utils
             PathOwner pathOwner,
             CarCurrentLane currentLane,
             DynamicBuffer<PathElement> pathElementBuffer,
-            DynamicBuffer<CarNavigationLane> carNavigationLaneBuffer
+            DynamicBuffer<CarNavigationLane> carNavigationLaneBuffer,
+            ref ComponentLookup<Owner> ownerLookup,
+            ref ComponentLookup<SlaveLane> slaveLaneLookup
         )
         {
-            return (pathElementBuffer.Length == 0 || pathOwner.m_ElementIndex == pathElementBuffer.Length)
-                && (
-                    carNavigationLaneBuffer.Length == 0
-                    || currentLane.m_Lane == carNavigationLaneBuffer[carNavigationLaneBuffer.Length - 1].m_Lane
-                    || currentLane.m_ChangeLane == carNavigationLaneBuffer[carNavigationLaneBuffer.Length - 1].m_Lane
-                );
+            if (pathElementBuffer.Length != 0 && pathOwner.m_ElementIndex != pathElementBuffer.Length)
+            {
+                return false;
+            }
+            if (currentLane.m_ChangeLane != Entity.Null)
+            {
+                return false;
+            }
+            if (carNavigationLaneBuffer.Length != 0)
+            {
+                var lastLane = carNavigationLaneBuffer[carNavigationLaneBuffer.Length - 1].m_Lane;
+                if (ownerLookup.TryGetComponent(currentLane.m_Lane, out var currentOwner) && ownerLookup.TryGetComponent(lastLane, out var lastOwner))
+                {
+                    if (currentOwner.m_Owner != lastOwner.m_Owner)
+                    {
+                        return false;
+                    }
+                }
+                if (slaveLaneLookup.TryGetComponent(currentLane.m_Lane, out var currentSlave) && slaveLaneLookup.TryGetComponent(lastLane, out var lastSlave))
+                {
+                    if (currentSlave.m_Group != lastSlave.m_Group)
+                    {
+                        return false;
+                    }
+                }
+                else if (currentLane.m_Lane != lastLane)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public static float CalculateDistance(

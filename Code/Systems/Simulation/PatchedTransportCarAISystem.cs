@@ -678,7 +678,7 @@ namespace BoardingController.Systems.Simulation
                     && (publicTransport.m_State & PublicTransportFlags.Boarding) == 0
                     && m_RouteWaypoints.HasBuffer(currentRoute.m_Route)
                     && m_WaypointData.HasComponent(target.m_Target)
-                    && BoardingUtils.BoardingSpaceReached(pathOwner, currentLane, pathElementBuffer, navigationLanes)
+                    && BoardingUtils.BoardingSpaceReached(pathOwner, currentLane, pathElementBuffer, navigationLanes, ref m_OwnerData, ref m_SlaveLaneData)
                 )
                 {
                     if (customVehicleValue is CustomVehicle customVehicle1)
@@ -692,7 +692,7 @@ namespace BoardingController.Systems.Simulation
                             customVehicle1.m_LowSpeedTime = 0;
                         }
                         float distance = BoardingUtils.CalculateDistance(pathOwner, currentLane, pathElementBuffer, navigationLanes, ref m_CurveData) * 1;
-                        if (customVehicle1.m_LowSpeedTime >= math.max(1, math.pow(distance, 2) / 100))
+                        if (customVehicle1.m_LowSpeedTime >= math.max(1, math.pow(distance, 1.6) / 1024))
                         {
                             if (StartBoarding(jobIndex, vehicleEntity, currentRoute, prefabRef, ref cargoTransport, ref publicTransport, ref target, flag2))
                             {
