@@ -17,12 +17,15 @@ namespace BoardingController.Utils
             PathOwner pathOwner,
             CarCurrentLane currentLane,
             DynamicBuffer<PathElement> pathElementBuffer,
-            DynamicBuffer<CarNavigationLane> carNavigationLaneBuffer,
-            ref ComponentLookup<Curve> curveLookup
+            DynamicBuffer<CarNavigationLane> carNavigationLaneBuffer
         )
         {
-            return (currentLane.m_LaneFlags & Game.Vehicles.CarLaneFlags.EndOfPath) != 0
-                || CalculateDistance(pathOwner, currentLane, pathElementBuffer, carNavigationLaneBuffer, ref curveLookup) <= 20;
+            return (pathElementBuffer.Length == 0 || pathOwner.m_ElementIndex == pathElementBuffer.Length)
+                && (
+                    carNavigationLaneBuffer.Length == 0
+                    || currentLane.m_Lane == carNavigationLaneBuffer[carNavigationLaneBuffer.Length - 1].m_Lane
+                    || currentLane.m_ChangeLane == carNavigationLaneBuffer[carNavigationLaneBuffer.Length - 1].m_Lane
+                );
         }
 
         public static float CalculateDistance(
@@ -54,12 +57,6 @@ namespace BoardingController.Utils
                 }
             }
             return distance;
-        }
-
-        public static void FinishPathfinding(DynamicBuffer<PathElement> pathElementBuffer, DynamicBuffer<CarNavigationLane> carNavigationLaneBuffer)
-        {
-            pathElementBuffer.Clear();
-            carNavigationLaneBuffer.Clear();
         }
     }
 }
