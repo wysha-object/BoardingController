@@ -24,7 +24,8 @@ namespace BoardingController.Utils
                 && (
                     carNavigationLaneBuffer.Length == 0
                     || currentLane.m_Lane == carNavigationLaneBuffer[carNavigationLaneBuffer.Length - 1].m_Lane
-                    || currentLane.m_ChangeLane == carNavigationLaneBuffer[carNavigationLaneBuffer.Length - 1].m_Lane
+                    // || currentLane.m_ChangeLane == carNavigationLaneBuffer[carNavigationLaneBuffer.Length - 1].m_Lane
+                    // 正在变道的车不好停, 先注释掉
                 );
         }
 
