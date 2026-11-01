@@ -1,7 +1,7 @@
 {
-    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "Version",
-    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "Release Channel",
-    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "Version",
+    "Options.GROUP[BoardingController.BoardingController.Mod.GroupVersion]": "버전",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "릴리즈 채널",
+    "Options.OPTION[BoardingController.BoardingController.Mod.Settings.Version]": "버전",
     "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.ReleaseChannel]": "The release channel to use for updates.",
     "Options.OPTION_DESCRIPTION[BoardingController.BoardingController.Mod.Settings.Version]": "The current version of the mod.",
     "Options.SECTION[BoardingController.BoardingController.Mod]": "Boarding Controller",
